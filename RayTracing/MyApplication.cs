@@ -1,3 +1,5 @@
+using OpenTK.Mathematics;
+
 namespace RayTracing;
 
 public class MyApplication
@@ -7,13 +9,14 @@ public class MyApplication
 
     // constructor
     public MyApplication(Surface screen)
-    {r
+    {
         Screen = screen;
     }
 
     // initialize
     public void Init()
     {
+        var camera = new Camera((0, 0, 0), (0, 0, 1), (0, 1, 0));
     }
 
     // tick: renders one frame
