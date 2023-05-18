@@ -2,8 +2,8 @@ namespace RayTracing;
 
 public class Scene
 {
-    public List<Light> LightSources;
-    public List<Primitive> Primitives;
+    public List<Light> LightSources = new();
+    public List<Primitive> Primitives = new();
 
     public Intersection ClosestIntersection(Ray ray)
     {

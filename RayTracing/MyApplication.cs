@@ -1,29 +1,27 @@
-using OpenTK.Mathematics;
-
 namespace RayTracing;
 
 public class MyApplication
 {
-    // member variables
-    public Surface Screen;
+    private readonly RayTracer _rayTracer;
 
     // constructor
     public MyApplication(Surface screen)
     {
-        Screen = screen;
+        var lights = new List<Light> { new() };
+        var shapes = new List<Primitive> { new Plane(), new Sphere() };
+        _rayTracer = new RayTracer(screen, lights, shapes);
     }
+
+    public Surface Screen => _rayTracer.Display;
 
     // initialize
     public void Init()
     {
-        var camera = new Camera((0, 0, 0), (0, 0, 1), (0, 1, 0));
     }
 
     // tick: renders one frame
     public void Tick()
     {
-        Screen.Clear(0);
-        Screen.Print("hello world", 2, 2, 0xffffff);
-        Screen.Line(2, 20, 160, 20, 0xff0000);
+        _rayTracer.Render();
     }
 }
