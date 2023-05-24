@@ -11,7 +11,7 @@ public class RayTracer
     public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
     {
         Display = display;
-        _camera = new Camera(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
+        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY);
         _scene = new Scene
         {
             LightSources = new List<Light>(lightSources),
