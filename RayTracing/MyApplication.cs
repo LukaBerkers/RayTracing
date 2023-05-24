@@ -7,8 +7,12 @@ public class MyApplication
     // constructor
     public MyApplication(Surface screen)
     {
+        // Just one light, I don't care about its properties for now
         var lights = new List<Light> { new() };
-        var shapes = new List<Primitive> { new Plane(), new Sphere() };
+        // Red sphere in front
+        var redSphere = new Sphere((-2, 0, -4), 1, (1, 0, 0));
+        var shapes = new List<Primitive> { redSphere };
+
         _rayTracer = new RayTracer(screen, lights, shapes);
     }
 

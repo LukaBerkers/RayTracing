@@ -1,5 +1,4 @@
 using OpenTK.Mathematics;
-using SixLabors.ImageSharp;
 
 namespace RayTracing;
 
@@ -25,6 +24,14 @@ public class Sphere : Primitive
 {
     public Vector3 Position;
     public float Radius;
+
+    public Sphere(Vector3 position, float radius, Vector3 color = default)
+    {
+        Position = position;
+        Radius = radius;
+        Color = color;
+    }
+
     public override Intersection Intersect(Ray ray)
     {
         throw new NotImplementedException();
