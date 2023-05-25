@@ -63,6 +63,16 @@ public class RayTracer
                 break;
             DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
+
+        // To test: move green sphere up
+        switch (_scene.Primitives[1])
+        {
+            case Sphere sphere:
+                sphere.Position.Y += 1.0f / 32.0f;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private Vector2i DebugWorldToScreen(Vector3 vec)
