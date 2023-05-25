@@ -26,7 +26,7 @@ public class RayTracer
         throw new NotImplementedException();
     }
 
-    private int ConvertColor(Vector3 color)
+    private static int ConvertColor(Vector3 color)
     {
         var r = Convert.ToInt32(color.X * 255) << 16;
         var g = Convert.ToInt32(color.Y * 255) << 8;
