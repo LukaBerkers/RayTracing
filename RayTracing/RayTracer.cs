@@ -59,9 +59,8 @@ public class RayTracer
         foreach (var sphere in _scene.Primitives.OfType<Sphere>())
         {
             var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
-            if (float.IsNaN(circleRadius))
-                break;
-            DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
+            if (!float.IsNaN(circleRadius))
+                DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
 
         // To test: move green sphere up
