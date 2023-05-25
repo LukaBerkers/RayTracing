@@ -14,12 +14,14 @@ public class Camera
         Position = position;
         LookAt = lookAt;
         Up = up;
-        ScreenPlane screenPlane = new ScreenPlane
+        var midScreen = position + lookAt;
+        var right = Vector3.Cross(lookAt, up);
+        var screenPlane = new ScreenPlane
         {
-            TopLeft = (-1, +1, +1),
-            TopRight = (+1, +1, +1),
-            BottomLeft = (-1, -1, +1),
-            BottomRight = (+1, -1, +1)
+            TopLeft = midScreen + up - right,
+            TopRight = midScreen + up + right,
+            BottomLeft = midScreen - up - right,
+            BottomRight = midScreen - up + right
         };
     }
 
@@ -28,10 +30,9 @@ public class Camera
 public struct ScreenPlane
 {
     // ( 0, 0, 0)
-    public Vector3 TopLeft; // (-1, +1, +1)
-    public Vector3 TopRight; // (+1, +1, +1)
-    public Vector3 BottomLeft; // (-1, -1, +1)
-    public Vector3 BottomRight; // (+1, -1, +1)
-    
+    public Vector3 TopLeft; // (-1, +1, -1)
+    public Vector3 TopRight; // (+1, +1, -1)
+    public Vector3 BottomLeft; // (-1, -1, -1)
+    public Vector3 BottomRight; // (+1, -1, -1)
 }
 
