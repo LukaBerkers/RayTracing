@@ -26,6 +26,15 @@ public class RayTracer
         throw new NotImplementedException();
     }
 
+    private int ConvertColor(Vector3 color)
+    {
+        var r = Convert.ToInt32(color.X * 255) << 16;
+        var g = Convert.ToInt32(color.Y * 255) << 8;
+        var b = Convert.ToInt32(color.Z * 255);
+
+        return r | g | b;
+    }
+
     #region Debug
 
     public void Debug(float height = 0.0f)
@@ -52,23 +61,26 @@ public class RayTracer
             var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
             if (float.IsNaN(circleRadius))
                 break;
-            DebugDrawCircle(sphere.Position.Xz, circleRadius);
+            DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
     }
 
     private Vector2i DebugWorldToScreen(Vector3 vec)
     {
-        // First flatten; assume the vector is in the right y plane
-        var flat = vec.Xz;
+        // Flatten; assume the vector is in the right y plane
+        return DebugWorldToScreen(vec.Xz);
+    }
 
+    private Vector2i DebugWorldToScreen(Vector2 vec)
+    {
         // Amount of pixels per unit lenght
         const int scale = 32;
         // Let the origin be at the middle-bottom
         Vector2i originInScreenSpace = (Display.Width / 2, Display.Height * 7 / 8);
 
-        // Then convert to integer representation
-        var pixel = originInScreenSpace + (Vector2i)(flat * scale);
-        
+        // Convert to integer representation
+        var pixel = originInScreenSpace + (Vector2i)(vec * scale);
+
         return pixel;
     }
 
@@ -92,9 +104,21 @@ public class RayTracer
         return float.Sqrt(sphere.Radius * sphere.Radius - (height - sphere.Position.Y) * (height - sphere.Position.Y));
     }
 
-    private void DebugDrawCircle(Vector2 center, float radius)
+    private void DebugDrawCircle(Vector2 center, float radius, Vector3 color)
     {
-        throw new NotImplementedException();
+        const int segments = 64;
+        var displayColor = ConvertColor(color);
+
+        for (var i = 0; i < segments; i++)
+        {
+            var angleStart = i * 2 * float.Pi / segments;
+            var angleEnd = (i + 1) * 2 * float.Pi / segments;
+            var segmentStart = center + Matrix2.CreateRotation(angleStart) * Vector2.UnitX;
+            var segmentEnd = center + Matrix2.CreateRotation(angleEnd) * Vector2.UnitX;
+            var lineStart = DebugWorldToScreen(segmentStart);
+            var lineEnd = DebugWorldToScreen(segmentEnd);
+            Display.Line(lineStart.X, lineStart.Y, lineEnd.X, lineEnd.Y, displayColor);
+        }
     }
 
     #endregion

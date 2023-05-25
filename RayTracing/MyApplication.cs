@@ -11,7 +11,8 @@ public class MyApplication
         var lights = new List<Light> { new() };
         // Red sphere in front
         var redSphere = new Sphere((-2, 0, -4), 1, (1, 0, 0));
-        var shapes = new List<Primitive> { redSphere };
+        var greenSphere = new Sphere((1, 0, -6), 4, (0, 1, 0));
+        var shapes = new List<Primitive> { redSphere, greenSphere };
 
         _rayTracer = new RayTracer(screen, lights, shapes);
     }
