@@ -16,7 +16,7 @@ public class Camera
         Up = up;
         var midScreen = position + lookAt;
         var right = Vector3.Cross(lookAt, up);
-        var screenPlane = new ScreenPlane
+        ScreenPlane = new ScreenPlane
         {
             TopLeft = midScreen + up - right,
             TopRight = midScreen + up + right,
