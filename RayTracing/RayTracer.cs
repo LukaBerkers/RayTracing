@@ -113,8 +113,8 @@ public class RayTracer
         {
             var angleStart = i * 2 * float.Pi / segments;
             var angleEnd = (i + 1) * 2 * float.Pi / segments;
-            var segmentStart = center + Matrix2.CreateRotation(angleStart) * Vector2.UnitX;
-            var segmentEnd = center + Matrix2.CreateRotation(angleEnd) * Vector2.UnitX;
+            var segmentStart = center + Matrix2.CreateRotation(angleStart) * (radius * Vector2.UnitX);
+            var segmentEnd = center + Matrix2.CreateRotation(angleEnd) * (radius * Vector2.UnitX);
             var lineStart = DebugWorldToScreen(segmentStart);
             var lineEnd = DebugWorldToScreen(segmentEnd);
             Display.Line(lineStart.X, lineStart.Y, lineEnd.X, lineEnd.Y, displayColor);
