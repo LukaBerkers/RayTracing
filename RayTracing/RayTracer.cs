@@ -64,7 +64,7 @@ public class RayTracer
         }
 
         // To test: move green sphere up
-        switch (_scene.Primitives[1])
+        switch (_scene.Primitives[2])
         {
             case Sphere sphere:
                 sphere.Position.Y += 1.0f / 32.0f;

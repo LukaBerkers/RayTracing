@@ -14,6 +14,13 @@ public class Plane : Primitive
 {
     public Vector3 Normal;
     public float Distance;
+
+    public Plane(Vector3 normal, float distanceFromOrigin)
+    {
+        Normal = normal;
+        Distance = distanceFromOrigin;
+    }
+
     public override Intersection Intersect(Ray ray)
     {
         throw new NotImplementedException();
