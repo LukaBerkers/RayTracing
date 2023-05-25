@@ -65,7 +65,7 @@ public class OpenTKApp : GameWindow
     public OpenTKApp()
         : base(GameWindowSettings.Default, new NativeWindowSettings
         {
-            Size = new Vector2i(640, 400),
+            Size = new Vector2i(1280, 800),
             Profile = AllowPrehistoricOpenGl ? ContextProfile.Compatability : ContextProfile.Core,
             Flags = AllowPrehistoricOpenGl ? ContextFlags.Default : ContextFlags.ForwardCompatible
         })

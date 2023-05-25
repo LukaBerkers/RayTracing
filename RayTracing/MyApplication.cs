@@ -26,6 +26,7 @@ public class MyApplication
     // tick: renders one frame
     public void Tick()
     {
-        _rayTracer.Render();
+        // _rayTracer.Render();
+        _rayTracer.Debug();
     }
 }
