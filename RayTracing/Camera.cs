@@ -10,19 +10,20 @@ public class Camera
     public Vector3 Position;
     public ScreenPlane ScreenPlane;
 
-    public Camera(Vector3 position, Vector3 lookAt, Vector3 up)
+    public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f)
     {
         Position = position;
         _lookAt = lookAt.Normalized();
         _up = up.Normalized();
         var midScreen = position + lookAt;
         _right = Vector3.Cross(lookAt, up);
+        var scaledRight = aspectRatio * _right;
         ScreenPlane = new ScreenPlane
         {
-            TopLeft = midScreen + up - _right,
-            TopRight = midScreen + up + _right,
-            BottomLeft = midScreen - up - _right,
-            BottomRight = midScreen - up + _right
+            TopLeft = midScreen + up - scaledRight,
+            TopRight = midScreen + up + scaledRight,
+            BottomLeft = midScreen - up - scaledRight,
+            BottomRight = midScreen - up + scaledRight
         };
     }
 
