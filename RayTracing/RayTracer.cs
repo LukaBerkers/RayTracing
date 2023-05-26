@@ -8,6 +8,9 @@ public class RayTracer
     private Camera _camera;
     private Scene _scene;
 
+    // For easier access
+    private ScreenPlane Screen => _camera.ScreenPlane;
+
     public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
     {
         Display = display;
@@ -24,7 +27,27 @@ public class RayTracer
     {
         Display.Clear(0);
 
-        throw new NotImplementedException();
+        for (var y = 0; y < Display.Height; y++)
+        {
+            var heightScale = (float)y / Display.Height;
+
+            for (var x = 0; x < Display.Width; x++)
+            {
+                var widthScale = (float)x / Display.Width;
+
+                // Compute viewing ray
+                var screenPosition = Screen.TopLeft + widthScale * Screen.TopLR + heightScale * Screen.TBLeft;
+                var direction = screenPosition;
+                direction.NormalizeFast();
+                var ray = new Ray(_camera.Position, direction);
+
+                // Intersect ray with scene
+                var intersection = _scene.ClosestIntersection(ray);
+
+                // Compute illumination at intersection
+                // Store resulting color at pixel
+            }
+        }
     }
 
     private static int ConvertColor(Vector3 color)
@@ -138,4 +161,10 @@ public struct Ray
 {
     public Vector3 Base;
     public Vector3 Direction;
+
+    public Ray(Vector3 @base, Vector3 direction)
+    {
+        Base = @base;
+        Direction = direction;
+    }
 }
