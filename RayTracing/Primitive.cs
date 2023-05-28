@@ -7,7 +7,7 @@ public abstract class Primitive
 {
     public Vector3 Color;
 
-    public abstract Intersection Intersect(Ray ray);
+    public abstract Intersection? Intersect(Ray ray);
 }
 
 public class Plane : Primitive
@@ -32,7 +32,7 @@ public class Plane : Primitive
         Distance = distanceFromOrigin;
     }
 
-    public override Intersection Intersect(Ray ray)
+    public override Intersection? Intersect(Ray ray)
     {
         // Since `Normal` is unit length, the plane has equation: Ax + By + Cz - D = 0.
         // Where:   [A, B, C] = `Normal`
@@ -44,7 +44,12 @@ public class Plane : Primitive
         //          b = `ray.Base`
         //          d = `ray.Direction` (unit)
         
-        // If this is zero the 
+        // If this is zero the ray is parallel to the plane
+        var cosAngleRayPlaneNormal = Vector3.Dot(Normal, ray.Direction);
+        if (Helper.IsZero(cosAngleRayPlaneNormal))
+        {
+            return null;
+        }
 
         throw new NotImplementedException();
     }
@@ -62,7 +67,7 @@ public class Sphere : Primitive
         Color = color;
     }
 
-    public override Intersection Intersect(Ray ray)
+    public override Intersection? Intersect(Ray ray)
     {
         throw new NotImplementedException();
     }
