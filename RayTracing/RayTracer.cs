@@ -45,9 +45,13 @@ public class RayTracer
                 var intersection = _scene.ClosestIntersection(ray);
 
                 // Compute illumination at intersection
-                // For now we just use the color of the object
-                // Black if there was no intersection
-                var color = intersection?.Color ?? Vector3.Zero;
+                // For now we just use the color of the object, except if it is too far away
+                // Black if there was no intersection or it is too far away
+                Vector3 color;
+                if (intersection is null || intersection.Distance > 5.0f)
+                    color = Vector3.Zero;
+                else
+                    color = intersection.Color;
 
                 // Store resulting color at pixel
                 Display.Plot(x, y, ConvertColor(color));
