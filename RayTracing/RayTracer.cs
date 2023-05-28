@@ -160,6 +160,10 @@ public class RayTracer
 public struct Ray
 {
     public Vector3 Base;
+
+    /// <summary>
+    ///     Assumed to be unit length.
+    /// </summary>
     public Vector3 Direction;
 
     public Ray(Vector3 @base, Vector3 direction)

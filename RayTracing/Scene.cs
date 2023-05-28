@@ -1,3 +1,5 @@
+using OpenTK.Mathematics;
+
 namespace RayTracing;
 
 public class Scene
@@ -7,10 +9,8 @@ public class Scene
 
     public Intersection ClosestIntersection(Ray ray)
     {
-        var closestIntersection = new Intersection
-        {
-            Distance = float.PositiveInfinity
-        };
+        var closestIntersection = new Intersection(float.PositiveInfinity, null, Vector3.Zero);
+        
         foreach (var primitive in Primitives)
         {
             var intersection = primitive.Intersect(ray);

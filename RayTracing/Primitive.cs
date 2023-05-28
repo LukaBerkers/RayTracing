@@ -12,9 +12,20 @@ public abstract class Primitive
 
 public class Plane : Primitive
 {
+    /// <summary>
+    ///     Assumed to be of unit length.
+    /// </summary>
     public Vector3 Normal;
+
+    /// <summary>
+    ///     Signed distance in the direction of `Normal`.
+    /// </summary>
     public float Distance;
 
+    /// <param name="normal">Should be a unit vector.</param>
+    /// <param name="distanceFromOrigin">
+    ///     Should be the signed distance according to the direction of <paramref name="normal" />.
+    /// </param>
     public Plane(Vector3 normal, float distanceFromOrigin)
     {
         Normal = normal;
@@ -23,6 +34,18 @@ public class Plane : Primitive
 
     public override Intersection Intersect(Ray ray)
     {
+        // Since `Normal` is unit length, the plane has equation: Ax + By + Cz - D = 0.
+        // Where:   [A, B, C] = `Normal`
+        //          D = `Distance`
+        
+        // At intersection ray-parameter t = (D - (n . b)) / (n . d)
+        // Where:   D = `Distance`
+        //          n = `Normal` (unit)
+        //          b = `ray.Base`
+        //          d = `ray.Direction` (unit)
+        
+        // If this is zero the 
+
         throw new NotImplementedException();
     }
 }
