@@ -26,10 +26,12 @@ public class Plane : Primitive
     /// <param name="distanceFromOrigin">
     ///     Should be the signed distance according to the direction of <paramref name="normal" />.
     /// </param>
-    public Plane(Vector3 normal, float distanceFromOrigin)
+    /// <param name="color">Color of the plane as RGB vector from 0 to 1.</param>
+    public Plane(Vector3 normal, float distanceFromOrigin, Vector3 color)
     {
         Normal = normal;
         Distance = distanceFromOrigin;
+        Color = color;
     }
 
     public override Intersection? Intersect(Ray ray)
@@ -51,7 +53,7 @@ public class Plane : Primitive
 
         var distance = (Distance - Vector3.Dot(Normal, ray.Base)) / cosAngleRayPlaneNormal;
 
-        return new Intersection(distance, this, Normal);
+        return new Intersection(distance, this, Normal, Color);
     }
 }
 
