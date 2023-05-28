@@ -9,8 +9,9 @@ public class Scene
     {
         Intersection? closestIntersection = null;
         
-        foreach (var intersection in Primitives.Select(primitive => primitive.Intersect(ray)))
+        foreach (var primitive in Primitives)
         {
+            var intersection = primitive.Intersect(ray);
             if (closestIntersection is null && intersection is not null) closestIntersection = intersection;
             // expression will always be false if one of them is null
             if (closestIntersection?.Distance > intersection?.Distance) closestIntersection = intersection;
