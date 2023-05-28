@@ -37,21 +37,21 @@ public class Plane : Primitive
         // Since `Normal` is unit length, the plane has equation: Ax + By + Cz - D = 0.
         // Where:   [A, B, C] = `Normal`
         //          D = `Distance`
-        
-        // At intersection ray-parameter t = (D - (n . b)) / (n . d)
+
+        // At intersection: ray-parameter t = (D - (n . b)) / (n . d)
         // Where:   D = `Distance`
         //          n = `Normal` (unit)
         //          b = `ray.Base`
         //          d = `ray.Direction` (unit)
-        
+        // And since d is unit: t is the distance to the intersection
+
         // If this is zero the ray is parallel to the plane
         var cosAngleRayPlaneNormal = Vector3.Dot(Normal, ray.Direction);
-        if (Helper.IsZero(cosAngleRayPlaneNormal))
-        {
-            return null;
-        }
+        if (Helper.IsZero(cosAngleRayPlaneNormal)) return null;
 
-        throw new NotImplementedException();
+        var distance = (Distance - Vector3.Dot(Normal, ray.Base)) / cosAngleRayPlaneNormal;
+
+        return new Intersection(distance, this, Normal);
     }
 }
 
