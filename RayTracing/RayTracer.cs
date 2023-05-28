@@ -48,7 +48,7 @@ public class RayTracer
                 // For now we just use the color of the object, except if it is too far away
                 // Black if there was no intersection or it is too far away
                 Vector3 color;
-                if (intersection is null || intersection.Distance > 5.0f)
+                if (intersection is null || intersection.Distance > 10.0f)
                     color = Vector3.Zero;
                 else
                     color = intersection.Color;

@@ -52,7 +52,8 @@ public class Plane : Primitive
         if (Helper.IsZero(cosAngleRayPlaneNormal)) return null;
 
         var distance = (Distance - Vector3.Dot(Normal, ray.Base)) / cosAngleRayPlaneNormal;
-
+        if (distance < 0.0f || Helper.IsZero(distance)) return null;
+        
         return new Intersection(distance, this, Normal, Color);
     }
 }
