@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using OpenTK.Mathematics;
 
 namespace RayTracing;
 
@@ -6,13 +7,12 @@ public static class Helper
 {
     public static bool IsZero(float value)
     {
-        return value == 0.0f || float.IsSubnormal(value);
+        return Compare(0.0f, value) == 0;
     }
 
     public static int Compare(float left, float right)
     {
-        // This will probably need a bigger error margin in the future, for now this works.
-        return IsZero(left - right) ? 0 : left.CompareTo(right);
+        return MathHelper.ApproximatelyEquivalent(left, right, 0.1f) ? 0 : left.CompareTo(right);
     }
 
     public static QuadraticSolution SolveQuadratic(float a, float b, float c)
