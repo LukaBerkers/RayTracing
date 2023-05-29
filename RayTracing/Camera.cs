@@ -55,4 +55,7 @@ public struct ScreenPlane
     public Vector3 TopRight; // (+1, +1, -1)
     public Vector3 BottomLeft; // (-1, -1, -1)
     public Vector3 BottomRight; // (+1, -1, -1)
+
+    public Vector3 TopLR => TopRight - TopLeft;
+    public Vector3 TBLeft => BottomLeft - TopLeft;
 }

@@ -8,6 +8,9 @@ public class RayTracer
     private Camera _camera;
     private Scene _scene;
 
+    // For easier access
+    private ScreenPlane Screen => _camera.ScreenPlane;
+
     public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
     {
         Display = display;
@@ -24,7 +27,46 @@ public class RayTracer
     {
         Display.Clear(0);
 
-        throw new NotImplementedException();
+        for (var y = 0; y < Display.Height; y++)
+        {
+            var heightScale = (float)y / Display.Height;
+
+            for (var x = 0; x < Display.Width; x++)
+            {
+                var widthScale = (float)x / Display.Width;
+
+                // Compute viewing ray
+                var screenPosition = Screen.TopLeft + widthScale * Screen.TopLR + heightScale * Screen.TBLeft;
+                var direction = screenPosition;
+                direction.NormalizeFast();
+                var ray = new Ray(_camera.Position, direction);
+
+                // Intersect ray with scene
+                var intersection = _scene.ClosestIntersection(ray);
+
+                // Compute illumination at intersection
+                // For now we just use the the color times the inverse distance to get a depth map
+                Vector3 color;
+                // Black if there was no intersection
+                if (intersection is null || intersection.Distance > 6.0f)
+                    color = Vector3.Zero;
+                else
+                    color = intersection.Color * (1 - intersection.Distance / 6.0f);
+
+                // Store resulting color at pixel
+                Display.Plot(x, y, ConvertColor(color));
+            }
+        }
+        
+        // To test: shrink the green sphere
+        switch (_scene.Primitives[2])
+        {
+            case Sphere sphere:
+                sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static int ConvertColor(Vector3 color)
@@ -137,5 +179,20 @@ public class RayTracer
 public struct Ray
 {
     public Vector3 Base;
+
+    /// <summary>
+    ///     Assumed to be unit length.
+    /// </summary>
     public Vector3 Direction;
+
+    public Ray(Vector3 @base, Vector3 direction)
+    {
+        Base = @base;
+        Direction = direction;
+    }
+
+    public Vector3 Evaluate(float t)
+    {
+        return Base + t * Direction;
+    }
 }
