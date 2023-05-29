@@ -51,7 +51,22 @@ public class RayTracer
                 if (intersection is null || intersection.Distance > 6.0f)
                     color = Vector3.Zero;
                 else
-                    color = intersection.Color * (1 - intersection.Distance / 6.0f);
+                {
+                    // Shadow rays
+                    var intersectLocation = ray.Evaluate(intersection.Distance);
+                    var isLit = true;
+                    foreach (var light in _scene.LightSources)
+                    {
+                        var shadowRayDirection = light.Location - intersectLocation;
+                        shadowRayDirection.NormalizeFast();
+                        var shadowRay = new Ray(intersectLocation, shadowRayDirection);
+                        var shadowIntersection = _scene.ClosestIntersection(shadowRay);
+                        if (shadowIntersection is not null && !Helper.IsZero(shadowIntersection.Distance))
+                            isLit = false;
+                    }
+
+                    color = isLit ? intersection.Color * (1 - intersection.Distance / 6.0f) : Vector3.Zero;
+                }
 
                 // Store resulting color at pixel
                 Display.Plot(x, y, ConvertColor(color));
