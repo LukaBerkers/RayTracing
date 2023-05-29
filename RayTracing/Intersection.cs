@@ -6,6 +6,8 @@ public class Intersection
 {
     public float Distance;
     public Primitive NearestPrimitive;
+
+    /// <summary>Currently not guaranteed to be unit length</summary>
     public Vector3 Normal;
     public Vector3 Color;
 

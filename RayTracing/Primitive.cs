@@ -86,6 +86,29 @@ public class Sphere : Primitive
         //              r = `Radius`
         // And since d is unit: t is the distance to the intersection
 
-        throw new NotImplementedException();
+        var positionToBase = ray.Base - Position;
+        var distanceSolution = Helper.SolveQuadratic
+        (
+            ray.Direction.LengthSquared,
+            2.0f * Vector3.Dot(ray.Direction, positionToBase),
+            positionToBase.LengthSquared - Radius * Radius
+        );
+
+        switch (distanceSolution)
+        {
+            // If the ray is tangent we also return no intersection
+            case QuadraticSolution.None or QuadraticSolution.One:
+                return null;
+            case QuadraticSolution.Two solution:
+            {
+                // This should be the closest intersection, we don't care about the other one
+                var t1 = solution.Val1;
+                // Note that this is not normalized
+                var normal = ray.Evaluate(t1) - Position;
+                return new Intersection(t1, this, normal, Color);
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(distanceSolution));
+        }
     }
 }

@@ -57,6 +57,16 @@ public class RayTracer
                 Display.Plot(x, y, ConvertColor(color));
             }
         }
+        
+        // To test: shrink the green sphere
+        switch (_scene.Primitives[2])
+        {
+            case Sphere sphere:
+                sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static int ConvertColor(Vector3 color)
@@ -179,5 +189,10 @@ public struct Ray
     {
         Base = @base;
         Direction = direction;
+    }
+
+    public Vector3 Evaluate(float t)
+    {
+        return Base + t * Direction;
     }
 }
