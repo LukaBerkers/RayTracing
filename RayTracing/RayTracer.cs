@@ -105,6 +105,18 @@ public class RayTracer
             if (!float.IsNaN(circleRadius))
                 DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
+        
+        // Draw nine rays
+        for (var i = 0; i < 9; i++)
+        {
+            var ratioAlongScreen = i / 8.0f;
+            var posAlongScreen = leftVec + ratioAlongScreen * (rightVec - leftVec);
+            var ray = new Ray(_camera.Position, posAlongScreen.Normalized());
+            var intersection = _scene.ClosestIntersection(ray);
+            var distance = intersection?.Distance ?? 100.0f;
+            var pos = DebugWorldToScreen(ray.Evaluate(distance));
+            Display.Line(camera.X, camera.Y, pos.X, pos.Y, 0xff_ff_00);
+        }
 
         // To test: move green sphere up
         switch (_scene.Primitives[2])
