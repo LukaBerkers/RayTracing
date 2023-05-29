@@ -45,13 +45,13 @@ public class RayTracer
                 var intersection = _scene.ClosestIntersection(ray);
 
                 // Compute illumination at intersection
-                // For now we just use the color of the object, except if it is too far away
-                // Black if there was no intersection or it is too far away
+                // For now we just use the the color times the inverse distance to get a depth map
                 Vector3 color;
-                if (intersection is null || intersection.Distance > 10.0f)
+                // Black if there was no intersection
+                if (intersection is null || intersection.Distance > 6.0f)
                     color = Vector3.Zero;
                 else
-                    color = intersection.Color;
+                    color = intersection.Color * (1 - intersection.Distance / 6.0f);
 
                 // Store resulting color at pixel
                 Display.Plot(x, y, ConvertColor(color));
