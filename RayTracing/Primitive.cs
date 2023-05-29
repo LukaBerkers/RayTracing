@@ -72,6 +72,20 @@ public class Sphere : Primitive
 
     public override Intersection? Intersect(Ray ray)
     {
+        // Equation of the sphere is (x - h)^2 + (y - k)^2 + (z - l)^2 = r^2
+        // Where:   [h, k, l] = `Position`
+        //          r = `Radius`
+        
+        // At intersection: ray-parameter t = (-b ± sqrt(b^2 - 4ac)) / 2a   (quadratic formula)
+        // Where:   a = d . d
+        //          b = 2 * (d . (b - p))
+        //          c = (b - p) . (b - p) - r^2     (note that: v . v = |v|^2)
+        //      Where:  d = `ray.Direction` (unit)
+        //              b = `ray.Base`
+        //              p = `Position`
+        //              r = `Radius`
+        // And since d is unit: t is the distance to the intersection
+
         throw new NotImplementedException();
     }
 }
