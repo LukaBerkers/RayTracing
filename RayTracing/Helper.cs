@@ -12,7 +12,7 @@ public static class Helper
 
     public static int Compare(float left, float right)
     {
-        return MathHelper.ApproximatelyEquivalent(left, right, 0.1f) ? 0 : left.CompareTo(right);
+        return MathHelper.ApproximatelyEquivalent(left, right, 1.0f / 8192.0f) ? 0 : left.CompareTo(right);
     }
 
     public static QuadraticSolution SolveQuadratic(float a, float b, float c)

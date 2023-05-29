@@ -58,10 +58,16 @@ public class RayTracer
                     foreach (var light in _scene.LightSources)
                     {
                         var shadowRayDirection = light.Location - intersectLocation;
+                        var distanceToLight = shadowRayDirection.LengthFast;
                         shadowRayDirection.NormalizeFast();
                         var shadowRay = new Ray(intersectLocation, shadowRayDirection);
                         var shadowIntersection = _scene.ClosestIntersection(shadowRay);
-                        if (shadowIntersection is not null && !Helper.IsZero(shadowIntersection.Distance))
+                        if
+                        (
+                            shadowIntersection is not null
+                            && Helper.Compare(shadowIntersection.Distance, 0.0f) >= 0
+                            && Helper.Compare(shadowIntersection.Distance, distanceToLight) < 0
+                        )
                             isLit = false;
                     }
 
