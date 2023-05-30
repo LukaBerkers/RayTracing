@@ -8,6 +8,8 @@ public class RayTracer
     private Camera _camera;
     private Scene _scene;
     private readonly Vector3 _ambient = Vector3.One / 16.0f;
+    private readonly Vector3 _specular = Vector3.One;
+    private const float Shininess = 16.0f;
 
     // For easier access
     private ScreenPlane Screen => _camera.ScreenPlane;
@@ -69,9 +71,29 @@ public class RayTracer
                             ) <= 0)
                             continue;
 
-                        // Just simple distance fall-off with angle modulation
-                        var cosLightAngle = Vector3.Dot(intersection.Normal, shadowRayDirection);
+                        // Distance fall-off with angle modulation
+                        var lightDirection = shadowRayDirection;
+                        var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
                         illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+
+                        switch (intersection.NearestPrimitive.Material)
+                        {
+                            case Primitive.MaterialType.Matte:
+                                break;
+                            case Primitive.MaterialType.Plastic:
+                            {
+                                // Specular component
+                                var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
+                                reflectDirection.NormalizeFast();
+                                var shine = float.Pow(Vector3.Dot(direction, reflectDirection), Shininess);
+                                illumination += _specular * light.Intensity * shine / distanceToLightSquared;
+                                break;
+                            }
+                            case Primitive.MaterialType.Metal:
+                                throw new NotImplementedException();
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
 
                     illumination += intersection.Color * _ambient;
