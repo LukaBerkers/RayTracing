@@ -7,7 +7,7 @@ public class RayTracer
     public readonly Surface Display;
     private Camera _camera;
     private Scene _scene;
-    private readonly Vector3 _ambient = Vector3.One / 32.0f;
+    private readonly Vector3 _ambient = Vector3.One / 16.0f;
 
     // For easier access
     private ScreenPlane Screen => _camera.ScreenPlane;
@@ -69,8 +69,9 @@ public class RayTracer
                             ) <= 0)
                             continue;
 
-                        // Just simple distance fall-off
-                        illumination += intersection.Color * light.Intensity / distanceToLightSquared;
+                        // Just simple distance fall-off with angle modulation
+                        var cosLightAngle = Vector3.Dot(intersection.Normal, shadowRayDirection);
+                        illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
                     }
 
                     illumination += intersection.Color * _ambient;
