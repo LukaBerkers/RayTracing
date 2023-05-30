@@ -10,9 +10,9 @@ public class MyApplication
     public MyApplication(Surface screen)
     {
         // Just one light, I don't care about its properties for now
-        var lights = new List<Light> { new((3, 4, 0), (24, 24, 24)) };
+        var lights = new List<Light> { new((3, 4, 0), (8, 24, 24)), new((-1, 5, -1), (24, 8, 8)) };
 
-        var plane = new Plane(Vector3.UnitY, -1.0f, (0.5f, 0.0f, 0.5f));
+        var plane = new Plane(Vector3.UnitY, -1.0f, (0.5f, 0.125f, 0.5f));
         var redSphere = new Sphere((-2, 0, -4), 1, (1, 0, 0));
         var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0));
 
