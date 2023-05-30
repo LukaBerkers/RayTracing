@@ -55,14 +55,18 @@ public class RayTracer
                     foreach (var light in _scene.LightSources)
                     {
                         var shadowRayDirection = light.Location - intersectLocation;
-                        var distanceToLight = shadowRayDirection.LengthFast;
+                        var distanceToLightSquared = shadowRayDirection.LengthFast;
                         shadowRayDirection.NormalizeFast();
                         var shadowRay = new Ray(intersectLocation, shadowRayDirection);
                         var shadowIntersection = _scene.ClosestIntersection(shadowRay);
                         if
                         (
                             shadowIntersection is null
-                            || Helper.Compare(shadowIntersection.Distance, distanceToLight) > 0
+                            || Helper.Compare
+                            (
+                                shadowIntersection.Distance * shadowIntersection.Distance,
+                                distanceToLightSquared
+                            ) > 0
                         )
                             illumination += intersection.Color * light.Intensity;
                     }
