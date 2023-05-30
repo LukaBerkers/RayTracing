@@ -46,15 +46,12 @@ public class RayTracer
 
                 // Compute illumination at intersection
                 // For now we just use the the color times the inverse distance to get a depth map
-                Vector3 color;
                 // Black if there was no intersection
-                if (intersection is null || intersection.Distance > 6.0f)
-                    color = Vector3.Zero;
-                else
+                var illumination = Vector3.Zero;
+                if (intersection is not null)
                 {
                     // Shadow rays
                     var intersectLocation = ray.Evaluate(intersection.Distance);
-                    var isLit = true;
                     foreach (var light in _scene.LightSources)
                     {
                         var shadowRayDirection = light.Location - intersectLocation;
@@ -64,18 +61,15 @@ public class RayTracer
                         var shadowIntersection = _scene.ClosestIntersection(shadowRay);
                         if
                         (
-                            shadowIntersection is not null
-                            && Helper.Compare(shadowIntersection.Distance, 0.0f) >= 0
-                            && Helper.Compare(shadowIntersection.Distance, distanceToLight) < 0
+                            shadowIntersection is null
+                            || Helper.Compare(shadowIntersection.Distance, distanceToLight) > 0
                         )
-                            isLit = false;
+                            illumination += intersection.Color * light.Intensity;
                     }
-
-                    color = isLit ? intersection.Color * (1 - intersection.Distance / 6.0f) : Vector3.Zero;
                 }
 
                 // Store resulting color at pixel
-                Display.Plot(x, y, ConvertColor(color));
+                Display.Plot(x, y, ConvertColor(illumination));
             }
         }
         
