@@ -106,7 +106,7 @@ public class RayTracer
 
     private Vector2i DebugWorldToScreen(Vector2 vec)
     {
-        // Amount of pixels per unit lenght
+        // Amount of pixels per unit length
         const int scale = 32;
         // Let the origin be at the middle-bottom
         Vector2i originInScreenSpace = (Display.Width / 2, Display.Height * 7 / 8);

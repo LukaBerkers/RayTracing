@@ -64,6 +64,35 @@ public class Sphere : Primitive
 
     public override Intersection Intersect(Ray ray)
     {
+        // Ray intersection with a 3D model: sphere
+        
+        // ray.Base & ray.Direction
+        // Base E = (ex, ey, ez) 
+        // Direction D = (dx, dy, dz)
+
+        // base
+        float ex = ray.Base[0];
+        float ey = ray.Base[1];
+        float ez = ray.Base[2];
+
+        // direction
+        float dx = ray.Direction[0];
+        float dy = ray.Direction[1];
+        float dz = ray.Direction[2];
+
+        // sphere centre
+        float x0 = Position[0];
+        float y0 = Position[1];
+        float z0 = Position[2];
+
+        float a = Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2);
+        float b = 2 * (ex - x0) * dx + 2 * (ey - y0) * dy + 2 * (ez - z0) * dz;
+        float c = Math.pow(ex - x0, 2) + Math.pow(ey - y0, 2)  + Math.pow(ez - z0, 2) ;
+
+        float t1 = (-b + sqrt(b * b + 4 * a * c)) / (2 * a);
+        float t2 = (-b - sqrt(b * b + 4 * a * c)) / (2 * a);
+
+
         throw new NotImplementedException();
     }
 }
