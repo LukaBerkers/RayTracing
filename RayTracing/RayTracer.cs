@@ -7,6 +7,7 @@ public class RayTracer
     public readonly Surface Display;
     private Camera _camera;
     private Scene _scene;
+    private readonly Vector3 _ambient = Vector3.One / 32.0f;
 
     // For easier access
     private ScreenPlane Screen => _camera.ScreenPlane;
@@ -71,6 +72,8 @@ public class RayTracer
                         // Just simple distance fall-off
                         illumination += intersection.Color * light.Intensity / distanceToLightSquared;
                     }
+
+                    illumination += intersection.Color * _ambient;
                 }
 
                 // Clamp illumination
