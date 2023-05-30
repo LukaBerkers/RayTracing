@@ -55,7 +55,7 @@ public class RayTracer
                     foreach (var light in _scene.LightSources)
                     {
                         var shadowRayDirection = light.Location - intersectLocation;
-                        var distanceToLightSquared = shadowRayDirection.LengthFast;
+                        var distanceToLightSquared = shadowRayDirection.LengthSquared;
                         shadowRayDirection.NormalizeFast();
                         var shadowRay = new Ray(intersectLocation, shadowRayDirection);
                         var shadowIntersection = _scene.ClosestIntersection(shadowRay);
