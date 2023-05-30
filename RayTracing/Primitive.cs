@@ -101,8 +101,12 @@ public class Sphere : Primitive
                 return null;
             case QuadraticSolution.Two solution:
             {
-                // This should be the closest intersection, we don't care about the other one
-                var t1 = solution.Val1;
+                // t1 < t2
+                var (t1, t2) = (solution.Val1, solution.Val2);
+                // We need the closest intersection > 0
+                var t = Helper.Compare(t1, 0.0f) > 0 ? t1 : t2;
+                // If t is still negative return no intersection
+                if (Helper.Compare(t, 0.0f) <= 0) return null;
                 // Note that this is not normalized
                 var normal = ray.Evaluate(t1) - Position;
                 return new Intersection(t1, this, normal, Color);
