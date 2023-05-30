@@ -106,6 +106,13 @@ public class RayTracer
         // Draw camera in green
         var camera = DebugWorldToScreen(_camera.Position);
         Display.Bar(camera.X - 1, camera.Y - 1, camera.X + 1, camera.Y + 1, 0x00_ff_00);
+        
+        // Light sources
+        foreach (var light in _scene.LightSources)
+        {
+            var lightPos = DebugWorldToScreen(light.Location);
+            Display.Bar(lightPos.X - 1, lightPos.Y - 1, lightPos.X + 1, lightPos.Y + 1, 0xff_ff_ff);
+        }
 
         // Draw screen plane in white
         // Get mid point of top and bottom corners
@@ -125,16 +132,32 @@ public class RayTracer
                 DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
         
-        // Draw nine rays
-        for (var i = 0; i < 9; i++)
+        // Draw eleven rays
+        for (var i = 0; i < 11; i++)
         {
-            var ratioAlongScreen = i / 8.0f;
+            // Primary rays
+            var ratioAlongScreen = i / 10.0f;
             var posAlongScreen = leftVec + ratioAlongScreen * (rightVec - leftVec);
             var ray = new Ray(_camera.Position, posAlongScreen.Normalized());
             var intersection = _scene.ClosestIntersection(ray);
             var distance = intersection?.Distance ?? 100.0f;
-            var pos = DebugWorldToScreen(ray.Evaluate(distance));
+            var intersectLocation = ray.Evaluate(distance);
+            var pos = DebugWorldToScreen(intersectLocation);
             Display.Line(camera.X, camera.Y, pos.X, pos.Y, 0xff_ff_00);
+            
+            // Shadow rays
+            if (intersection is null) continue;
+            foreach (var light in _scene.LightSources)
+            {
+                var shadowRayDirection = light.Location - intersectLocation;
+                shadowRayDirection.Normalize();
+                var shadowRay = new Ray(intersectLocation, shadowRayDirection);
+                var shadowIntersection = _scene.ClosestIntersection(shadowRay);
+                var shadowDistance = shadowIntersection?.Distance ?? 100.0f;
+                var shadowIntersectionLocation = shadowRay.Evaluate(shadowDistance);
+                var shadowPos = DebugWorldToScreen(shadowIntersectionLocation);
+                Display.Line(pos.X, pos.Y, shadowPos.X, shadowPos.Y, 0x80_80_00);
+            }
         }
 
         // To test: move green sphere up
