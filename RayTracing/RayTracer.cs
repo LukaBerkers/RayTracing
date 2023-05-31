@@ -76,23 +76,25 @@ public class RayTracer
                         var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
                         illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
 
-                        switch (intersection.NearestPrimitive.Material)
+                        if
+                        (
+                            intersection.NearestPrimitive.Material
+                            is Primitive.MaterialType.Plastic
+                            or Primitive.MaterialType.Metal
+                        )
                         {
-                            case Primitive.MaterialType.Matte:
-                                break;
-                            case Primitive.MaterialType.Plastic:
+                            // Specular component
+                            var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
+                            reflectDirection.NormalizeFast();
+                            var shine = float.Pow(Vector3.Dot(direction, reflectDirection), Shininess);
+                            var shineColor = intersection.NearestPrimitive.Material switch
                             {
-                                // Specular component
-                                var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
-                                reflectDirection.NormalizeFast();
-                                var shine = float.Pow(Vector3.Dot(direction, reflectDirection), Shininess);
-                                illumination += _specular * light.Intensity * shine / distanceToLightSquared;
-                                break;
-                            }
-                            case Primitive.MaterialType.Metal:
-                                throw new NotImplementedException();
-                            default:
-                                throw new ArgumentOutOfRangeException();
+                                Primitive.MaterialType.Plastic => _specular,
+                                Primitive.MaterialType.Metal => intersection.Color,
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+
+                            illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
                         }
                     }
 
