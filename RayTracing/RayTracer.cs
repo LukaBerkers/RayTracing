@@ -56,7 +56,9 @@ public class RayTracer
 
     private Vector3 Trace(Ray ray)
     {
-        while (true)
+        const int bounceLimit = 8;
+        
+        for (var bounces = 0; bounces <= bounceLimit; bounces++)
         {
             // Intersect ray with scene
             var intersection = Scene.ClosestIntersection(ray);
@@ -123,6 +125,8 @@ public class RayTracer
 
             return illumination;
         }
+        
+        return Vector3.Zero;
     }
 
     private static int ConvertColor(Vector3 color)
