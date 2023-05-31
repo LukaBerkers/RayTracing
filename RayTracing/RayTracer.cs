@@ -104,7 +104,8 @@ public class RayTracer
 
             var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
             reflectDirection.NormalizeFast();
-            var shine = float.Pow(Vector3.Dot(ray.Direction, reflectDirection), Shininess);
+            // Note here we need the vector towards the viewer, hence we use the negative ray direction
+            var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
             var shineColor = intersection.NearestPrimitive.Material switch
             {
                 Primitive.MaterialType.Plastic => _specular,
