@@ -12,7 +12,8 @@ public abstract class Primitive
     {
         Matte,
         Plastic,
-        Metal
+        Metal,
+        Mirror
     }
     
     public abstract Intersection? Intersect(Ray ray);

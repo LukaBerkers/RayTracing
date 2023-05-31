@@ -5,7 +5,7 @@ namespace RayTracing;
 public class RayTracer
 {
     private const float Shininess = 16.0f;
-    private readonly Vector3 _ambient = Vector3.One / 16.0f;
+    private readonly Vector3 _ambient = Vector3.One / 12.0f;
     private readonly Camera _camera;
     private readonly Vector3 _specular = Vector3.One;
     public readonly Surface Display;

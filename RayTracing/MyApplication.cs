@@ -14,10 +14,11 @@ public class MyApplication
 
         var plane = new Plane(Vector3.UnitY, -1.0f, (0.5f, 0.125f, 0.5f));
         Vector3 copperColor = (13.0f / 18.0f, 9.0f / 20.0f, 0.2f);
-        var copper = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
+        var copperBall = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
         var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0), Primitive.MaterialType.Plastic);
+        var mirrorBall = new Sphere((-2, 2, -6), 2, Vector3.One, Primitive.MaterialType.Mirror);
 
-        var shapes = new List<Primitive> { plane, copper, greenSphere };
+        var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall };
 
         _rayTracer = new RayTracer(screen, lights, shapes);
     }
