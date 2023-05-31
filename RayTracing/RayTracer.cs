@@ -4,8 +4,8 @@ namespace RayTracing;
 
 public class RayTracer
 {
-    private const float Shininess = 16.0f;
-    private readonly Vector3 _ambient = Vector3.One / 16.0f;
+    private const int Shininess = 16;
+    private readonly Vector3 _ambient = Vector3.One / 12.0f;
     private readonly Camera _camera;
     private readonly Vector3 _specular = Vector3.One;
     public readonly Surface Display;
@@ -56,69 +56,77 @@ public class RayTracer
 
     private Vector3 Trace(Ray ray)
     {
-        // Intersect ray with scene
-        var intersection = Scene.ClosestIntersection(ray);
-
-        // Compute illumination at intersection
-        // Black if there was no intersection
-        var illumination = Vector3.Zero;
-        if (intersection is null) return illumination;
+        const int bounceLimit = 8;
         
-        // Shadow rays
-        var intersectLocation = ray.Evaluate(intersection.Distance);
-        foreach (var light in Scene.LightSources)
+        for (var bounces = 0; bounces <= bounceLimit; bounces++)
         {
-            var shadowRayDirection = light.Location - intersectLocation;
-            var distanceToLightSquared = shadowRayDirection.LengthSquared;
-            shadowRayDirection.NormalizeFast();
-            var shadowRay = new Ray(intersectLocation, shadowRayDirection);
-            var shadowIntersection = Scene.ClosestIntersection(shadowRay);
-            // If there is a something between the original intersection and the light source, continue to
-            // the next light source and do not add to the illumination
-            if
-            (
-                shadowIntersection is not null
-                &&
-                Helper.Compare
-                (
-                    shadowIntersection.Distance * shadowIntersection.Distance,
-                    distanceToLightSquared
-                )
-                <= 0
-            )
-                continue;
+            // Intersect ray with scene
+            var intersection = Scene.ClosestIntersection(ray);
 
-            // Distance fall-off with angle modulation
-            var lightDirection = shadowRayDirection;
-            var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
-            illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+            // Compute illumination at intersection
+            // Black if there was no intersection
+            var illumination = Vector3.Zero;
+            if (intersection is null) return illumination;
 
-            // Specular component, only add if the material is plastic or metal
-            if
-            (
-                intersection.NearestPrimitive.Material
-                is not (Primitive.MaterialType.Plastic
-                or Primitive.MaterialType.Metal)
-            )
-                continue;
+            var intersectLocation = ray.Evaluate(intersection.Distance);
+            var material = intersection.NearestPrimitive.Material;
 
-            var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
-            reflectDirection.NormalizeFast();
-            // Note here we need the vector towards the viewer, hence we use the negative ray direction
-            var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
-            var shineColor = intersection.NearestPrimitive.Material switch
+            // Mirror reflection
+            if (material == Primitive.MaterialType.Mirror)
             {
-                Primitive.MaterialType.Plastic => _specular,
-                Primitive.MaterialType.Metal => intersection.Color,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                // Note here we use the vector from the viewer towards the object,
+                // hence the formula is the inverse of the one below.
+                var cosViewAngle = Vector3.Dot(ray.Direction, intersection.Normal);
+                var reflectDirection = ray.Direction - 2.0f * cosViewAngle * intersection.Normal;
+                reflectDirection.NormalizeFast();
 
-            illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
+                ray = new Ray(intersectLocation, reflectDirection);
+                continue;
+            }
+
+            // Shadow rays
+            foreach (var light in Scene.LightSources)
+            {
+                var shadowRayDirection = light.Location - intersectLocation;
+                var distanceToLightSquared = shadowRayDirection.LengthSquared;
+                shadowRayDirection.NormalizeFast();
+                var shadowRay = new Ray(intersectLocation, shadowRayDirection);
+                var shadowIntersection = Scene.ClosestIntersection(shadowRay);
+                // If there is a something between the original intersection and the light source, continue to
+                // the next light source and do not add to the illumination
+                if (shadowIntersection is not null &&
+                    Helper.Compare(shadowIntersection.Distance * shadowIntersection.Distance, distanceToLightSquared) <=
+                    0) continue;
+
+                // Distance fall-off with angle modulation
+                var lightDirection = shadowRayDirection;
+                var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
+                illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+
+                // Specular component
+                // Only add if the material is plastic or metal
+                if (material is not (Primitive.MaterialType.Plastic or Primitive.MaterialType.Metal)) continue;
+
+                var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
+                reflectDirection.NormalizeFast();
+                // Note here we need the vector towards the viewer, hence we use the negative ray direction
+            var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
+                var shineColor = material switch
+                {
+                    Primitive.MaterialType.Plastic => _specular,
+                    Primitive.MaterialType.Metal => intersection.Color,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
+            }
+
+            illumination += intersection.Color * _ambient;
+
+            return illumination;
         }
-
-        illumination += intersection.Color * _ambient;
-
-        return illumination;
+        
+        return Vector3.Zero;
     }
 
     private static int ConvertColor(Vector3 color)
