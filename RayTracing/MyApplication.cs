@@ -32,7 +32,35 @@ public class MyApplication
     // tick: renders one frame
     public void Tick()
     {
+        const bool debug = false;
+
+        if (debug)
+        {
+            _rayTracer.Debug();
+
+            // To test: move green sphere up
+            switch (_rayTracer.Scene.Primitives[2])
+            {
+                case Sphere sphere:
+                    sphere.Position.Y += 1.0f / 32.0f;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return;
+        }
+
         _rayTracer.Render();
-        // _rayTracer.Debug();
+
+        // To test: shrink the green sphere
+        switch (_rayTracer.Scene.Primitives[2])
+        {
+            case Sphere sphere:
+                sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }
