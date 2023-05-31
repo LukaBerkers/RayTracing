@@ -6,7 +6,15 @@ namespace RayTracing;
 public abstract class Primitive
 {
     public Vector3 Color;
+    public MaterialType Material;
 
+    public enum MaterialType
+    {
+        Matte,
+        Plastic,
+        Metal
+    }
+    
     public abstract Intersection? Intersect(Ray ray);
 }
 
@@ -27,11 +35,13 @@ public class Plane : Primitive
     ///     Should be the signed distance according to the direction of <paramref name="normal" />.
     /// </param>
     /// <param name="color">Color of the plane as RGB vector from 0 to 1.</param>
-    public Plane(Vector3 normal, float distanceFromOrigin, Vector3 color)
+    /// <param name="material">Defaults to matte.</param>
+    public Plane(Vector3 normal, float distanceFromOrigin, Vector3 color, MaterialType material = default)
     {
         Normal = normal;
         Distance = distanceFromOrigin;
         Color = color;
+        Material = material;
     }
 
     public override Intersection? Intersect(Ray ray)
@@ -63,11 +73,12 @@ public class Sphere : Primitive
     public Vector3 Position;
     public float Radius;
 
-    public Sphere(Vector3 position, float radius, Vector3 color = default)
+    public Sphere(Vector3 position, float radius, Vector3 color = default, MaterialType material = default)
     {
         Position = position;
         Radius = radius;
         Color = color;
+        Material = material;
     }
 
     public override Intersection? Intersect(Ray ray)
@@ -107,8 +118,8 @@ public class Sphere : Primitive
                 var t = Helper.Compare(t1, 0.0f) > 0 ? t1 : t2;
                 // If t is still negative return no intersection
                 if (Helper.Compare(t, 0.0f) <= 0) return null;
-                // Note that this is not normalized
                 var normal = ray.Evaluate(t1) - Position;
+                normal.NormalizeFast();
                 return new Intersection(t1, this, normal, Color);
             }
             default:

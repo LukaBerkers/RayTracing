@@ -4,24 +4,27 @@ namespace RayTracing;
 
 public class RayTracer
 {
+    private const float Shininess = 16.0f;
+    private readonly Vector3 _ambient = Vector3.One / 16.0f;
+    private readonly Camera _camera;
+    private readonly Vector3 _specular = Vector3.One;
     public readonly Surface Display;
-    private Camera _camera;
-    private Scene _scene;
-
-    // For easier access
-    private ScreenPlane Screen => _camera.ScreenPlane;
+    public readonly Scene Scene;
 
     public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
     {
         Display = display;
         var aspectRatio = (float)display.Width / display.Height;
         _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio);
-        _scene = new Scene
+        Scene = new Scene
         {
             LightSources = new List<Light>(lightSources),
             Primitives = new List<Primitive>(primitives)
         };
     }
+
+    // For easier access
+    private ScreenPlane Screen => _camera.ScreenPlane;
 
     public void Render()
     {
@@ -41,51 +44,81 @@ public class RayTracer
                 direction.NormalizeFast();
                 var ray = new Ray(_camera.Position, direction);
 
-                // Intersect ray with scene
-                var intersection = _scene.ClosestIntersection(ray);
+                var illumination = Trace(ray);
 
-                // Compute illumination at intersection
-                // For now we just use the the color times the inverse distance to get a depth map
-                // Black if there was no intersection
-                var illumination = Vector3.Zero;
-                if (intersection is not null)
-                {
-                    // Shadow rays
-                    var intersectLocation = ray.Evaluate(intersection.Distance);
-                    foreach (var light in _scene.LightSources)
-                    {
-                        var shadowRayDirection = light.Location - intersectLocation;
-                        var distanceToLightSquared = shadowRayDirection.LengthSquared;
-                        shadowRayDirection.NormalizeFast();
-                        var shadowRay = new Ray(intersectLocation, shadowRayDirection);
-                        var shadowIntersection = _scene.ClosestIntersection(shadowRay);
-                        if
-                        (
-                            shadowIntersection is null
-                            || Helper.Compare
-                            (
-                                shadowIntersection.Distance * shadowIntersection.Distance,
-                                distanceToLightSquared
-                            ) > 0
-                        )
-                            illumination += intersection.Color * light.Intensity;
-                    }
-                }
-
+                // Clamp illumination
+                illumination = Vector3.Clamp(illumination, Vector3.Zero, Vector3.One);
                 // Store resulting color at pixel
                 Display.Plot(x, y, ConvertColor(illumination));
             }
         }
+    }
+
+    private Vector3 Trace(Ray ray)
+    {
+        // Intersect ray with scene
+        var intersection = Scene.ClosestIntersection(ray);
+
+        // Compute illumination at intersection
+        // Black if there was no intersection
+        var illumination = Vector3.Zero;
+        if (intersection is null) return illumination;
         
-        // To test: shrink the green sphere
-        switch (_scene.Primitives[2])
+        // Shadow rays
+        var intersectLocation = ray.Evaluate(intersection.Distance);
+        foreach (var light in Scene.LightSources)
         {
-            case Sphere sphere:
-                sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            var shadowRayDirection = light.Location - intersectLocation;
+            var distanceToLightSquared = shadowRayDirection.LengthSquared;
+            shadowRayDirection.NormalizeFast();
+            var shadowRay = new Ray(intersectLocation, shadowRayDirection);
+            var shadowIntersection = Scene.ClosestIntersection(shadowRay);
+            // If there is a something between the original intersection and the light source, continue to
+            // the next light source and do not add to the illumination
+            if
+            (
+                shadowIntersection is not null
+                &&
+                Helper.Compare
+                (
+                    shadowIntersection.Distance * shadowIntersection.Distance,
+                    distanceToLightSquared
+                )
+                <= 0
+            )
+                continue;
+
+            // Distance fall-off with angle modulation
+            var lightDirection = shadowRayDirection;
+            var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
+            illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+
+            // Specular component, only add if the material is plastic or metal
+            if
+            (
+                intersection.NearestPrimitive.Material
+                is not (Primitive.MaterialType.Plastic
+                or Primitive.MaterialType.Metal)
+            )
+                continue;
+
+            var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
+            reflectDirection.NormalizeFast();
+            // Note here we need the vector towards the viewer, hence we use the negative ray direction
+            var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
+            var shineColor = intersection.NearestPrimitive.Material switch
+            {
+                Primitive.MaterialType.Plastic => _specular,
+                Primitive.MaterialType.Metal => intersection.Color,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
         }
+
+        illumination += intersection.Color * _ambient;
+
+        return illumination;
     }
 
     private static int ConvertColor(Vector3 color)
@@ -108,7 +141,14 @@ public class RayTracer
         Display.Bar(camera.X - 1, camera.Y - 1, camera.X + 1, camera.Y + 1, 0x00_ff_00);
         
         // Light sources
-        foreach (var light in _scene.LightSources)
+        foreach (var light in Scene.LightSources)
+        {
+            var lightPos = DebugWorldToScreen(light.Location);
+            Display.Bar(lightPos.X - 1, lightPos.Y - 1, lightPos.X + 1, lightPos.Y + 1, 0xff_ff_ff);
+        }
+
+        // Light sources
+        foreach (var light in Scene.LightSources)
         {
             var lightPos = DebugWorldToScreen(light.Location);
             Display.Bar(lightPos.X - 1, lightPos.Y - 1, lightPos.X + 1, lightPos.Y + 1, 0xff_ff_ff);
@@ -125,13 +165,13 @@ public class RayTracer
         Display.Line(left.X, left.Y, right.X, right.Y, 0xff_ff_ff);
 
         // Draw the spheres
-        foreach (var sphere in _scene.Primitives.OfType<Sphere>())
+        foreach (var sphere in Scene.Primitives.OfType<Sphere>())
         {
             var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
             if (!float.IsNaN(circleRadius))
                 DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
         }
-        
+
         // Draw eleven rays
         for (var i = 0; i < 11; i++)
         {
@@ -139,35 +179,25 @@ public class RayTracer
             var ratioAlongScreen = i / 10.0f;
             var posAlongScreen = leftVec + ratioAlongScreen * (rightVec - leftVec);
             var ray = new Ray(_camera.Position, posAlongScreen.Normalized());
-            var intersection = _scene.ClosestIntersection(ray);
+            var intersection = Scene.ClosestIntersection(ray);
             var distance = intersection?.Distance ?? 100.0f;
             var intersectLocation = ray.Evaluate(distance);
             var pos = DebugWorldToScreen(intersectLocation);
             Display.Line(camera.X, camera.Y, pos.X, pos.Y, 0xff_ff_00);
-            
+
             // Shadow rays
             if (intersection is null) continue;
-            foreach (var light in _scene.LightSources)
+            foreach (var light in Scene.LightSources)
             {
                 var shadowRayDirection = light.Location - intersectLocation;
                 shadowRayDirection.Normalize();
                 var shadowRay = new Ray(intersectLocation, shadowRayDirection);
-                var shadowIntersection = _scene.ClosestIntersection(shadowRay);
+                var shadowIntersection = Scene.ClosestIntersection(shadowRay);
                 var shadowDistance = shadowIntersection?.Distance ?? 100.0f;
                 var shadowIntersectionLocation = shadowRay.Evaluate(shadowDistance);
                 var shadowPos = DebugWorldToScreen(shadowIntersectionLocation);
                 Display.Line(pos.X, pos.Y, shadowPos.X, shadowPos.Y, 0x80_80_00);
             }
-        }
-
-        // To test: move green sphere up
-        switch (_scene.Primitives[2])
-        {
-            case Sphere sphere:
-                sphere.Position.Y += 1.0f / 32.0f;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
         }
     }
 
