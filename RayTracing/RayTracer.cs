@@ -11,11 +11,11 @@ public class RayTracer
     public readonly Surface Display;
     public readonly Scene Scene;
 
-    public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
+    public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives, float degree)
     {
         Display = display;
         var aspectRatio = (float)display.Width / display.Height;
-        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio);
+        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio, degree);
         Scene = new Scene
         {
             LightSources = new List<Light>(lightSources),
