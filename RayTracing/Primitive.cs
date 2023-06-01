@@ -119,9 +119,9 @@ public class Sphere : Primitive
                 var t = Helper.Compare(t1, 0.0f) > 0 ? t1 : t2;
                 // If t is still negative return no intersection
                 if (Helper.Compare(t, 0.0f) <= 0) return null;
-                var normal = ray.Evaluate(t1) - Position;
+                var normal = ray.Evaluate(t) - Position;
                 normal.NormalizeFast();
-                return new Intersection(t1, this, normal, Color);
+                return new Intersection(t, this, normal, Color);
             }
             default:
                 throw new ArgumentOutOfRangeException(nameof(distanceSolution));
