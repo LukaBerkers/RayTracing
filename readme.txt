@@ -2,10 +2,11 @@
 ||| Student Details |||
 =======================
 
-Student Name: Aryan Pokharna 
-Student ID: 7895488
 Student Name: Luka Berkers
 Student ID: 6793592
+Student Name: Aryan Pokharna 
+Student ID: 7895488
+
 
 ============================
 ||| Minimum Requirements |||
@@ -84,15 +85,3 @@ triangle primitives, primary rays, shadow rays and secondary rays.
 ||| External Materials Used |||
 ===============================
 As of our current submission, no external materials were used.
-
-
-_app.update in escape method - 
-in update method access raytracer which has access to camera
-then change the vector3 in the lookat vector
-
-W - S is for moving (only update position in the Look at direction)
-A - D is a rotation, which is automatically updated with the right vector
-
-myapplication - add fov 
-raytracer passes this through
-camera converts this to a multiplier 
