@@ -22,7 +22,28 @@ public class RayTracer
             Primitives = new List<Primitive>(primitives)
         };
     }
+    
+    // Keyboard movement of camera
+    public void MoveCameraForward(float moveSpeed)
+    {
+        _camera.Position += moveSpeed * _camera.LookAt;
+    }
+    public void MoveCameraBackward(float moveSpeed)
+    {
+        _camera.Position -= moveSpeed * _camera.LookAt;
+    }
+    public void RotateCameraLeft(float moveSpeed)
+    {
+        Vector3 right = Vector3.Cross(_camera.LookAt, _camera.Up);
+        _camera.Position -= moveSpeed * right;
+    }
 
+    public void RotateCameraRight(float moveSpeed)
+    {
+        Vector3 right = Vector3.Cross(_camera.LookAt, _camera.Up);
+        _camera.Position += moveSpeed * right;
+    }
+    
     // For easier access
     private ScreenPlane Screen => _camera.ScreenPlane;
 

@@ -1,4 +1,6 @@
 using OpenTK.Mathematics;
+using System;
+using System.Collections.Generic;
 
 namespace RayTracing;
 
@@ -64,5 +66,33 @@ public class MyApplication
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+    
+    // updates the camera placement depending on keyboard movement
+    public void Update(bool wPressed, bool aPressed, bool sPressed, bool dPressed)
+    {
+        const float moveSpeed = 0.2f;
+
+        // Move the camera forward and backward for keys 'w' and 's'
+        if (wPressed)
+        {
+            _rayTracer.MoveCameraForward(moveSpeed);
+        }
+        else if (sPressed)
+        {
+            _rayTracer.MoveCameraBackward(moveSpeed);
+        }
+        
+        // Move the camera left and right for keys 'a' and 'd'
+        
+        if (aPressed)
+        {
+            _rayTracer.RotateCameraLeft(moveSpeed);
+        }
+        else if (dPressed)
+        {
+            _rayTracer.RotateCameraRight(moveSpeed);
+        }
+
     }
 }
