@@ -158,4 +158,5 @@ In summary, the DebugDrawCircle method provides a convenient way to visualize ci
 ===============================
 ||| External Materials Used |||
 ===============================
-As of our current submission, no external materials were used.
+Many of the calculations are implementations of formulas and algorithms form the lecture slides.
+Some code in the Camera constructor is based on a section from the course literature, this is annotated with a comment.
