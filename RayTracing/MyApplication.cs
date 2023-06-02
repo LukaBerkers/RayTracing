@@ -32,9 +32,11 @@ public class MyApplication
         var copperBall = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
         var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0), Primitive.MaterialType.Plastic);
         var mirrorBall = new Sphere((-2, 2, -6), 2, Vector3.One, Primitive.MaterialType.Mirror);
-
+        // var triangle = new Triangle((0, 0, -4), (1, 1, -4), (-1, 1, -4), (0, 0.5f, 0), Primitive.MaterialType.Plastic);
+        
         var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall, diagonalWall };
-
+        // var shapes = new List<Primitive> { plane, triangle };
+        
         _rayTracer = new RayTracer(screen, lights, shapes, 90.0f);
     }
 
