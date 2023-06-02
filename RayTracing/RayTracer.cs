@@ -165,12 +165,33 @@ public class RayTracer
         // Draw a line between them
         Display.Line(left.X, left.Y, right.X, right.Y, 0xff_ff_ff);
 
-        // Draw the spheres
-        foreach (var sphere in Scene.Primitives.OfType<Sphere>())
+        // Draw the primitives
+        foreach (var primitive in Scene.Primitives)
         {
-            var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
-            if (!float.IsNaN(circleRadius))
-                DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
+            switch (primitive)
+            {
+                case Sphere sphere:
+                    var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
+                    if (!float.IsNaN(circleRadius))
+                        DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
+                    break;
+                case Plane plane:
+                    // Calculate intersection line with xz-plane
+                    Vector2 linePos;
+                    if (!Helper.IsZero(plane.Normal.Z))
+                        linePos = (0.0f, plane.Distance / plane.Normal.Z);
+                    else if (!Helper.IsZero(plane.Normal.X))
+                        linePos = (plane.Distance / plane.Normal.X, 0.0f);
+                    else
+                        // Plane is parallel to floor
+                        break;
+                    var lineDirection = Vector3.Cross(plane.Normal, Vector3.UnitY).Xz;
+                    var pos1 = DebugWorldToScreen(linePos - 16 * lineDirection);
+                    var pos2 = DebugWorldToScreen(linePos + 16 * lineDirection);
+                    var color = ConvertColor(plane.Color);
+                    Display.Line(pos1.X, pos1.Y, pos2.X, pos2.Y, color);
+                    break;
+            }
         }
 
         // Draw eleven rays
@@ -187,7 +208,8 @@ public class RayTracer
             Display.Line(camera.X, camera.Y, pos.X, pos.Y, 0xff_ff_00);
 
             // Shadow rays
-            if (intersection is null) continue;
+            if (intersection is null || intersection.NearestPrimitive.Material == Primitive.MaterialType.Mirror)
+                continue;
             foreach (var light in Scene.LightSources)
             {
                 var shadowRayDirection = light.Location - intersectLocation;
