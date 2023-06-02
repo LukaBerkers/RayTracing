@@ -186,8 +186,8 @@ public class RayTracer
                         // Plane is parallel to floor
                         break;
                     var lineDirection = Vector3.Cross(plane.Normal, Vector3.UnitY).Xz;
-                    var pos1 = DebugWorldToScreen(linePos - 16 * lineDirection);
-                    var pos2 = DebugWorldToScreen(linePos + 16 * lineDirection);
+                    var pos1 = DebugWorldToScreen(linePos - 32 * lineDirection);
+                    var pos2 = DebugWorldToScreen(linePos + 32 * lineDirection);
                     var color = ConvertColor(plane.Color);
                     Display.Line(pos1.X, pos1.Y, pos2.X, pos2.Y, color);
                     break;

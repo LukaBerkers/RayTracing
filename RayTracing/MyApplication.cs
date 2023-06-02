@@ -23,7 +23,7 @@ public class MyApplication
         var diagonalWall = new Plane
         (
             new Vector3(1.0f, 0.0f, 1.0f).Normalized(),
-            -10.0f, Vector3.Zero,
+            -10.0f, Vector3.One,
             Primitive.MaterialType.Plastic,
             TileTexture
         );
