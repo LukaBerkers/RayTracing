@@ -4,18 +4,22 @@ namespace RayTracing;
 
 public class RayTracer
 {
-    private const float Shininess = 16.0f;
-    private readonly Vector3 _ambient = Vector3.One / 16.0f;
+    private const int Shininess = 16;
+    private readonly Vector3 _ambient = Vector3.One / 12.0f;
     private readonly Camera _camera;
     private readonly Vector3 _specular = Vector3.One;
     public readonly Surface Display;
     public readonly Scene Scene;
 
-    public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives)
+    /// <param name="display"></param>
+    /// <param name="lightSources"></param>
+    /// <param name="primitives"></param>
+    /// <param name="fov">Field of view in degrees.</param>
+    public RayTracer(Surface display, IEnumerable<Light> lightSources, IEnumerable<Primitive> primitives, float fov)
     {
         Display = display;
         var aspectRatio = (float)display.Width / display.Height;
-        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio);
+        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio, fov);
         Scene = new Scene
         {
             LightSources = new List<Light>(lightSources),
@@ -56,69 +60,77 @@ public class RayTracer
 
     private Vector3 Trace(Ray ray)
     {
-        // Intersect ray with scene
-        var intersection = Scene.ClosestIntersection(ray);
-
-        // Compute illumination at intersection
-        // Black if there was no intersection
-        var illumination = Vector3.Zero;
-        if (intersection is null) return illumination;
+        const int bounceLimit = 8;
         
-        // Shadow rays
-        var intersectLocation = ray.Evaluate(intersection.Distance);
-        foreach (var light in Scene.LightSources)
+        for (var bounces = 0; bounces <= bounceLimit; bounces++)
         {
-            var shadowRayDirection = light.Location - intersectLocation;
-            var distanceToLightSquared = shadowRayDirection.LengthSquared;
-            shadowRayDirection.NormalizeFast();
-            var shadowRay = new Ray(intersectLocation, shadowRayDirection);
-            var shadowIntersection = Scene.ClosestIntersection(shadowRay);
-            // If there is a something between the original intersection and the light source, continue to
-            // the next light source and do not add to the illumination
-            if
-            (
-                shadowIntersection is not null
-                &&
-                Helper.Compare
-                (
-                    shadowIntersection.Distance * shadowIntersection.Distance,
-                    distanceToLightSquared
-                )
-                <= 0
-            )
-                continue;
+            // Intersect ray with scene
+            var intersection = Scene.ClosestIntersection(ray);
 
-            // Distance fall-off with angle modulation
-            var lightDirection = shadowRayDirection;
-            var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
-            illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+            // Compute illumination at intersection
+            // Black if there was no intersection
+            var illumination = Vector3.Zero;
+            if (intersection is null) return illumination;
 
-            // Specular component, only add if the material is plastic or metal
-            if
-            (
-                intersection.NearestPrimitive.Material
-                is not (Primitive.MaterialType.Plastic
-                or Primitive.MaterialType.Metal)
-            )
-                continue;
+            var intersectLocation = ray.Evaluate(intersection.Distance);
+            var material = intersection.NearestPrimitive.Material;
 
-            var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
-            reflectDirection.NormalizeFast();
-            // Note here we need the vector towards the viewer, hence we use the negative ray direction
-            var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
-            var shineColor = intersection.NearestPrimitive.Material switch
+            // Mirror reflection
+            if (material == Primitive.MaterialType.Mirror)
             {
-                Primitive.MaterialType.Plastic => _specular,
-                Primitive.MaterialType.Metal => intersection.Color,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                // Note here we use the vector from the viewer towards the object,
+                // hence the formula is the inverse of the one below.
+                var cosViewAngle = Vector3.Dot(ray.Direction, intersection.Normal);
+                var reflectDirection = ray.Direction - 2.0f * cosViewAngle * intersection.Normal;
+                reflectDirection.NormalizeFast();
 
-            illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
+                ray = new Ray(intersectLocation, reflectDirection);
+                continue;
+            }
+
+            // Shadow rays
+            foreach (var light in Scene.LightSources)
+            {
+                var shadowRayDirection = light.Location - intersectLocation;
+                var distanceToLightSquared = shadowRayDirection.LengthSquared;
+                shadowRayDirection.NormalizeFast();
+                var shadowRay = new Ray(intersectLocation, shadowRayDirection);
+                var shadowIntersection = Scene.ClosestIntersection(shadowRay);
+                // If there is a something between the original intersection and the light source, continue to
+                // the next light source and do not add to the illumination
+                if (shadowIntersection is not null &&
+                    Helper.Compare(shadowIntersection.Distance * shadowIntersection.Distance, distanceToLightSquared) <=
+                    0) continue;
+
+                // Distance fall-off with angle modulation
+                var lightDirection = shadowRayDirection;
+                var cosLightAngle = Vector3.Dot(intersection.Normal, lightDirection);
+                illumination += intersection.Color * light.Intensity * cosLightAngle / distanceToLightSquared;
+
+                // Specular component
+                // Only add if the material is plastic or metal
+                if (material is not (Primitive.MaterialType.Plastic or Primitive.MaterialType.Metal)) continue;
+
+                var reflectDirection = 2.0f * cosLightAngle * intersection.Normal - lightDirection;
+                reflectDirection.NormalizeFast();
+                // Note here we need the vector towards the viewer, hence we use the negative ray direction
+                var shine = float.Pow(Vector3.Dot(-ray.Direction, reflectDirection), Shininess);
+                var shineColor = material switch
+                {
+                    Primitive.MaterialType.Plastic => _specular,
+                    Primitive.MaterialType.Metal => intersection.Color,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                illumination += shineColor * light.Intensity * shine / distanceToLightSquared;
+            }
+
+            illumination += intersection.Color * _ambient;
+
+            return illumination;
         }
-
-        illumination += intersection.Color * _ambient;
-
-        return illumination;
+        
+        return Vector3.Zero;
     }
 
     private static int ConvertColor(Vector3 color)
@@ -157,12 +169,33 @@ public class RayTracer
         // Draw a line between them
         Display.Line(left.X, left.Y, right.X, right.Y, 0xff_ff_ff);
 
-        // Draw the spheres
-        foreach (var sphere in Scene.Primitives.OfType<Sphere>())
+        // Draw the primitives
+        foreach (var primitive in Scene.Primitives)
         {
-            var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
-            if (!float.IsNaN(circleRadius))
-                DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
+            switch (primitive)
+            {
+                case Sphere sphere:
+                    var circleRadius = DebugSpherePlaneIntersectionRadius(sphere, height);
+                    if (!float.IsNaN(circleRadius))
+                        DebugDrawCircle(sphere.Position.Xz, circleRadius, sphere.Color);
+                    break;
+                case Plane plane:
+                    // Calculate intersection line with xz-plane
+                    Vector2 linePos;
+                    if (!Helper.IsZero(plane.Normal.Z))
+                        linePos = (0.0f, plane.Distance / plane.Normal.Z);
+                    else if (!Helper.IsZero(plane.Normal.X))
+                        linePos = (plane.Distance / plane.Normal.X, 0.0f);
+                    else
+                        // Plane is parallel to floor
+                        break;
+                    var lineDirection = Vector3.Cross(plane.Normal, Vector3.UnitY).Xz;
+                    var pos1 = DebugWorldToScreen(linePos - 32 * lineDirection);
+                    var pos2 = DebugWorldToScreen(linePos + 32 * lineDirection);
+                    var color = ConvertColor(plane.Color);
+                    Display.Line(pos1.X, pos1.Y, pos2.X, pos2.Y, color);
+                    break;
+            }
         }
 
         // Draw eleven rays
@@ -179,7 +212,8 @@ public class RayTracer
             Display.Line(camera.X, camera.Y, pos.X, pos.Y, 0xff_ff_00);
 
             // Shadow rays
-            if (intersection is null) continue;
+            if (intersection is null || intersection.NearestPrimitive.Material == Primitive.MaterialType.Mirror)
+                continue;
             foreach (var light in Scene.LightSources)
             {
                 var shadowRayDirection = light.Location - intersectLocation;

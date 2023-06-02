@@ -10,12 +10,18 @@ public class Camera
     public Vector3 Position;
     public ScreenPlane ScreenPlane;
 
-    public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f)
+    public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f, float fov = 60.0f)
     {
         Position = position;
         _lookAt = lookAt.Normalized();
         _up = up.Normalized();
-        var midScreen = position + lookAt;
+
+        // Clamp the fov value to be within the range [60, 120] degrees
+        var degrees = MathHelper.Clamp(fov, 60.0f, 120.0f);
+        // Transitioning the degrees to a scalar
+        var screenDistance = 1 / float.Tan(MathHelper.DegreesToRadians(degrees) / 2.0f);
+
+        var midScreen = position + lookAt * screenDistance;
         _right = Vector3.Cross(lookAt, up);
         var scaledRight = aspectRatio * _right;
         ScreenPlane = new ScreenPlane
