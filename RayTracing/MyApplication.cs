@@ -27,14 +27,14 @@ public class MyApplication
             Primitive.MaterialType.Plastic,
             TileTexture
         );
-        // Vector3 copperColor = (13.0f / 18.0f, 9.0f / 20.0f, 0.2f);
-        // var copperBall = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
-        // var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0), Primitive.MaterialType.Plastic);
-        // var mirrorBall = new Sphere((-2, 2, -6), 2, Vector3.One, Primitive.MaterialType.Mirror);
-        var triangle = new Triangle((1, 1, -4), (2, 3, -5), (3, 2, -4), (0, 0.5f, 0), Primitive.MaterialType.Metal);
+        Vector3 copperColor = (13.0f / 18.0f, 9.0f / 20.0f, 0.2f);
+        var copperBall = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
+        var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0), Primitive.MaterialType.Plastic);
+        var mirrorBall = new Sphere((-2, 2, -6), 2, Vector3.One, Primitive.MaterialType.Mirror);
+        // var triangle = new Triangle((0, 0, -4), (1, 1, -4), (-1, 1, -4), (0, 0.5f, 0), Primitive.MaterialType.Plastic);
         
-        // var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall, diagonalWall, triangle };
-        var shapes = new List<Primitive> { plane, triangle };
+        var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall, diagonalWall };
+        // var shapes = new List<Primitive> { plane, triangle };
         
         _rayTracer = new RayTracer(screen, lights, shapes);
     }
@@ -70,13 +70,13 @@ public class MyApplication
         _rayTracer.Render();
 
         // To test: shrink the green sphere
-        // switch (_rayTracer.Scene.Primitives[2])
-        // {
-        //     case Sphere sphere:
-        //         sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
-        //         break;
-        //     default:
-        //         throw new ArgumentOutOfRangeException();
-        // }
+        switch (_rayTracer.Scene.Primitives[2])
+        {
+            case Sphere sphere:
+                sphere.Radius = float.Max(sphere.Radius - 1.0f / 32.0f, 0.0f);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }
