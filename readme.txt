@@ -11,8 +11,7 @@ Student ID: 7895488
 ||| Minimum Requirements |||
 ============================
 
-A statement about what minimum requirements and bonus assignments you have implemented (if any) 
-and information that is needed to grade them, including detailed information on your implementation.
+All minimum requirements were met and an unsuccessful attempt was made for the bonus marks of adding triangle primitives. 
 
 ----------
 | Camera |
