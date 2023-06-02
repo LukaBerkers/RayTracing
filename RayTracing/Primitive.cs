@@ -171,3 +171,58 @@ public class Sphere : Primitive
         }
     }
 }
+
+public class Triangle : Primitive
+{
+    public Vector3 V0;
+    public Vector3 V1;
+    public Vector3 V2;
+
+    public Triangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 color = default, MaterialType material = default)
+    {
+        V0 = v0;
+        V1 = v1;
+        V2 = v2;
+        Color = color;
+        Material = material;
+    }
+
+    public override Intersection? Intersect(Ray ray)
+    {
+        // Perform ray-triangle intersection using barycentric coordinates
+
+        var e1 = V1 - V0;
+        var e2 = V2 - V0;
+        var p = Vector3.Cross(ray.Direction, e2);
+        var det = Vector3.Dot(e1, p);
+
+        // If the determinant is close to zero, the ray is parallel to the triangle
+        if (Helper.IsZero(det)) return null;
+
+        var invDet = 1.0f / det;
+        var t = ray.Base - V0;
+        var u = Vector3.Dot(t, p) * invDet;
+
+        // Check if the intersection is outside the triangle
+        if (u < 0.0f || u > 1.0f) return null;
+
+        var q = Vector3.Cross(t, e1);
+        var v = Vector3.Dot(ray.Direction, q) * invDet;
+
+        // Check if the intersection is outside the triangle
+        if (v < 0.0f || u + v > 1.0f) return null;
+
+        var distance = Vector3.Dot(e2, q) * invDet;
+
+        // If the distance is negative, the intersection is behind the ray origin
+        if (distance < 0.0f) return null;
+
+        // Calculate the interpolated normal using barycentric coordinates
+        var n0 = Vector3.Cross(V1 - V0, V2 - V0).Normalized();
+        var n1 = Vector3.Cross(V2 - V1, V0 - V1).Normalized();
+        var n2 = Vector3.Cross(V0 - V2, V1 - V2).Normalized();
+        var normal = (1.0f - u - v) * n0 + u * n1 + v * n2;
+
+        return new Intersection(distance, this, normal, Color);
+    }
+}
