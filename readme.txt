@@ -86,8 +86,16 @@ Take for example: var lights = new List<Light> { new((3, 4, 0), (100, 24, 24)), 
 -------------
 | Materials |
 -------------
-To support the Phong shading model, each primitive (planes and spheres) in the Primitive class can be assigned a material type, such as Matte, Plastic, or Metal, which are defined as enum values in the code.
-The material type can be used to determine the shading calculations for each intersection point, considering factors like diffuse reflection, specular reflection, and ambient light.
+To support the Phong shading model, each primitive in the Primitive class can be assigned a material type, such as Matte, Plastic, or Metal, which are defined as enum values in the code.
+The material type are used to determine the shading calculations for each intersection point.
+If the material is `Matte` the object will only have diffuse shading.
+If the material is `Plastic` it will also get a specular component.
+In that case the specular components will be colored according to the color of the respective lights.
+If the material is `Metal` the specular component will instead be colored according to the color of the object at that location.
+The 'shininess' can be tweaked with a constant in the RayTracer class.
+If the material is `Mirror` no shading calculations are done at all, instead we restart with a new ray from the intersection location, in the reflected direction.
+The bounce limit is set to 8, but can be tweaked with a constant in the Trace method.
+If no non-mirror object is hit after the maximum amount of bounces the resulting color will be black.
 
 -----------------------
 | Demonstration Scene |
