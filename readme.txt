@@ -170,6 +170,13 @@ In summary, the DebugDrawCircle method provides a convenient way to visualize ci
 =====================================
 ||| Bonus Assignments Implemented |||
 =====================================
+We attempted to add triangle primitives to the scene as indicated by the third primitive in the primitive.cs file. 
+The Triangle class represents a triangle primitive in a ray tracing application. It is defined by three vertices V0, V1, and V2, which are Vector3 objects representing the positions of the triangle's three vertices in 3D space.
+The class provides an implementation of the Intersect method, which performs ray-triangle intersection using barycentric coordinates.
+Given a ray, it calculates the intersection point with the triangle, if any. The method returns an Intersection object that contains information about the intersection, such as the distance along the ray, the intersected primitive (the triangle itself), the surface normal at the intersection point, and the color of the triangle.
+The Triangle class can be used in a scene by adding instances of it to the list of primitives. When the ray tracer processes the scene and performs ray tracing, it will test for intersections between rays and the triangle primitives to determine the color of each pixel in the resulting image.
+
+We were able to project a 2-dimensional triangle onto the plane, however, ran into issues with further adjustments required for full functionality for graphing a three dimensional triangle object. 
 
 ===============================
 ||| External Materials Used |||
