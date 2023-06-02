@@ -191,8 +191,8 @@ public class Triangle : Primitive
     {
         // Perform ray-triangle intersection using barycentric coordinates
 
-        var e1 = V1 - V0;
-        var e2 = V2 - V0;
+        var e1 = V1 - V0; // B - A
+        var e2 = V2 - V0; // C - A
         var p = Vector3.Cross(ray.Direction, e2);
         var det = Vector3.Dot(e1, p);
 
