@@ -6,6 +6,7 @@ namespace RayTracing;
 public abstract class Primitive
 {
     public Vector3 Color;
+    protected Func<Vector2, Vector3>? Texture;
     public MaterialType Material;
 
     public enum MaterialType
@@ -31,18 +32,45 @@ public class Plane : Primitive
     /// </summary>
     public float Distance;
 
+    private readonly Vector3 _u;
+    private readonly Vector3 _v;
+
     /// <param name="normal">Should be a unit vector.</param>
     /// <param name="distanceFromOrigin">
     ///     Should be the signed distance according to the direction of <paramref name="normal" />.
     /// </param>
     /// <param name="color">Color of the plane as RGB vector from 0 to 1.</param>
     /// <param name="material">Defaults to matte.</param>
-    public Plane(Vector3 normal, float distanceFromOrigin, Vector3 color, MaterialType material = default)
+    /// <param name="textureMapping">A function from uv coordinates to a color.</param>
+    public Plane
+    (
+        Vector3 normal,
+        float distanceFromOrigin,
+        Vector3 color,
+        MaterialType material = default,
+        Func<Vector2, Vector3>? textureMapping = null
+    )
     {
         Normal = normal;
         Distance = distanceFromOrigin;
         Color = color;
         Material = material;
+        Texture = textureMapping;
+
+        // Constructing two unit vectors in the plane. This is based on §2.4.6 of Marschner et al, 4th ed.
+        // Find the smallest component of `normal`
+        int smallestComponent;
+        if (normal.Z < normal.X && normal.Z < normal.Y)
+            smallestComponent = 2;
+        else if (normal.Y < normal.X && normal.Y < normal.Z)
+            smallestComponent = 1;
+        else
+            smallestComponent = 0;
+
+        var t = normal;
+        t[smallestComponent] = 1;
+        _u = Vector3.Cross(t, normal).Normalized();
+        _v = Vector3.Cross(normal, _u);
     }
 
     public override Intersection? Intersect(Ray ray)
@@ -64,8 +92,23 @@ public class Plane : Primitive
 
         var distance = (Distance - Vector3.Dot(Normal, ray.Base)) / cosAngleRayPlaneNormal;
         if (distance < 0.0f || Helper.IsZero(distance)) return null;
-        
-        return new Intersection(distance, this, Normal, Color);
+
+        Vector3 color;
+        if (Texture is null)
+        {
+            color = Color;
+        }
+        else
+        {
+            // A point on the plane (specifically, the one closest to the origin)
+            var p = Distance * Normal;
+            var pToIntersection = ray.Evaluate(distance) - p;
+            var u = Vector3.Dot(pToIntersection, _u);
+            var v = Vector3.Dot(pToIntersection, _v);
+            color = Texture((u, v));
+        }
+
+        return new Intersection(distance, this, Normal, color);
     }
 }
 
