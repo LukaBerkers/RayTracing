@@ -34,7 +34,7 @@ The Camera class also calculates the screen plane based on the camera's position
 The LookAt and Up methods have getters and setters that updated on changes such as keyboard movement which is described later on.
 
 -------------
-| Primitives | !#$#@$#@%$#@%$#%#$%@!!@#$!@#$!@#$!@$@#$%#@$!@$@$@#!$@!$@!$@!$!@$@!#$@#!$!@#$@#$!@#
+| Primitives |
 -------------
 Primitives are defined as an abstract class with class attributes "Color" which is a RGB vector from 0 to 1 and 
 "Material" which is of type MaterialType which is an enum for Matte, Plastic, and Metal.
@@ -77,9 +77,14 @@ Since our development was done using the JetBrains Rider IDE, executing our prog
 which would run the executable using the preset configuration. The target framework is net7.0. 
 
 ---------------
-| Application | !#$#@$#@%$#@%$#%#$%@!!@#$!@#$!@#$!@$@#$%#@$!@$@$@#!$@!$@!$@!$!@$@!#$@#!$!@#$@#$!@#
+| Application |
 ---------------
-The application supports 
+Keyboard movement is observed from the OnUpdateFrame method within “Template.cs”. 
+The method checks the state of specific keyboard keys (W, A, S, D) and stores the corresponding boolean values (true if the key is pressed, false otherwise) in the variables wPressed, aPressed, sPressed, and dPressed.
+Subsequently, it calls the Update method of the _app object and passes the boolean values as arguments. This allows the application to handle the keyboard inputs and update its internal state based on the pressed keys.
+The Update method is responsible for updating the camera placement based on keyboard movement inputs. The method begins by defining a constant moveSpeed with a float value of 0.2, which determines the speed at which the camera moves or rotates. Next, it checks if the 'W' key is pressed (wPressed is true). If so, it calls the _rayTracer.MoveCameraForward method and passes the moveSpeed as an argument, effectively moving the camera forward in the scene. Similar function calls occur for the other keyboard movements - for instance moving the camera backward when the ’S’ key is pressed, and rotating the camera to the left or right when the 'A' or 'D' keys are pressed, respectively.
+Note that we utilise conditional “if” and “else if” statements to ensure that the user cannot simultaneously move the camera forward and backward, or simultaneously rotate the camera left and right. 
+Within “RayTracer.cs” the camera's position is updated by adding moveSpeed multiplied by the camera's LookAt vector. This effectively moves the camera in the direction it is currently looking. To ensure that we can rotate the camera on it’s y-axis, we can calculate the right vector and update the camera's position by adding moveSpeed multiplied by the right vector. This rotates the camera around its vertical axis to the right. Similar calculations can be performed to achieve backwards movement and leftwards rotation 
 
 ----------------
 | Debug Output |
