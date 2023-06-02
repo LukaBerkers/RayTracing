@@ -76,6 +76,7 @@ It keeps track of the closest intersection found so far by comparing the distanc
 ----------
 | Lights |
 ----------
+The ray tracer can correctly handle an arbitrary number of point lights and their shadows.
 A light source in the ray tracing scene is represented and defined by the "Light" class with Vector3 attributes "Location" and "Intensity". 
 The Light class provides a constructor that takes the location and intensity of the light source as parameters.
 The Location field represents the position of the light source in 3D space. It is a Vector3 that specifies the coordinates of the light source.
@@ -96,6 +97,14 @@ The 'shininess' can be tweaked with a constant in the RayTracer class.
 If the material is `Mirror` no shading calculations are done at all, instead we restart with a new ray from the intersection location, in the reflected direction.
 The bounce limit is set to 8, but can be tweaked with a constant in the Trace method.
 If no non-mirror object is hit after the maximum amount of bounces the resulting color will be black.
+
+The "TileTexture" function in "MyApplication.cs" takes a 2D UV coordinate (Vector2 uv) as input.
+It computes a value c by adding the floor values of uv.X and uv.Y, and then performing a bitwise AND operation with 1. The result is returned as a Vector3 with the value of c.
+This function is used to define a texture mapping for the planes in the scene. 
+The Plane constructor is updated to take in an optional textureMapping function which is assigned to the Texture properties of the Plane.
+If a texture mapping function is provided, it calculates the UV coordinates and uses the Texture function to determine the color at the intersection point.
+The result is returned as an Intersection object containing the distance, intersected primitive (the plane), surface normal, and color.
+These components allows us to create planes in the scene with customizable colors and optional texture mapping using the provided TileTexture function.
 
 -----------------------
 | Demonstration Scene |
