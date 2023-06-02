@@ -6,19 +6,26 @@ public class Camera
 {
     private Vector3 _lookAt;
     private Vector3 _position;
-    private float _aspectRatio;
+    private readonly float _aspectRatio;
+    private readonly float _screenDistance;
     public ScreenPlane ScreenPlane { get; private set; }
 
-    public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f)
+    public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f, float fov = 60.0f)
     {
         _position = position;
         _lookAt = lookAt.Normalized();
         _aspectRatio = aspectRatio;
+        _aspectRatio = aspectRatio;
         Up = up.Normalized();
         Right = Vector3.Cross(_lookAt, Up);
         
-        var midScreen = position + lookAt;
-        var scaledRight = aspectRatio * Right;
+        // Clamp the fov value to be within the range [60, 120] degrees
+        var degrees = MathHelper.Clamp(fov, 60.0f, 120.0f);
+        // Transitioning the degrees to a scalar
+        _screenDistance = 1 / float.Tan(MathHelper.DegreesToRadians(degrees) / 2.0f);
+
+        var midScreen = _position + _lookAt * _screenDistance;
+        var scaledRight = _aspectRatio * Right;
         ScreenPlane = new ScreenPlane(midScreen, up, scaledRight);
     }
 
@@ -29,7 +36,7 @@ public class Camera
         {
             _lookAt = value.Normalized();
             Right = Vector3.Cross(_lookAt, Up);
-            var midScreen = _position + _lookAt;
+            var midScreen = _position + _lookAt * _screenDistance;
             var scaledRight = _aspectRatio * Right;
             ScreenPlane = new ScreenPlane(midScreen, Up, scaledRight);
         }
@@ -45,7 +52,7 @@ public class Camera
         set
         {
             _position = value;
-            var midScreen = _position + _lookAt;
+            var midScreen = _position + _lookAt * _screenDistance;
             var scaledRight = _aspectRatio * Right;
             ScreenPlane = new ScreenPlane(midScreen, Up, scaledRight);
         }
