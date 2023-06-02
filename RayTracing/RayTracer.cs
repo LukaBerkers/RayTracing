@@ -6,8 +6,8 @@ public class RayTracer
 {
     private const int Shininess = 16;
     private readonly Vector3 _ambient = Vector3.One / 12.0f;
-    private readonly Camera _camera;
     private readonly Vector3 _specular = Vector3.One;
+    public readonly Camera Camera;
     public readonly Surface Display;
     public readonly Scene Scene;
 
@@ -15,37 +15,16 @@ public class RayTracer
     {
         Display = display;
         var aspectRatio = (float)display.Width / display.Height;
-        _camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio);
+        Camera = new Camera(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY, aspectRatio);
         Scene = new Scene
         {
             LightSources = new List<Light>(lightSources),
             Primitives = new List<Primitive>(primitives)
         };
     }
-    
-    // Keyboard movement of camera
-    public void MoveCameraForward(float moveSpeed)
-    {
-        _camera.Position += moveSpeed * _camera.LookAt;
-    }
-    public void MoveCameraBackward(float moveSpeed)
-    {
-        _camera.Position -= moveSpeed * _camera.LookAt;
-    }
-    public void RotateCameraLeft(float moveSpeed)
-    {
-        Vector3 right = Vector3.Cross(_camera.LookAt, _camera.Up);
-        _camera.Position -= moveSpeed * right;
-    }
 
-    public void RotateCameraRight(float moveSpeed)
-    {
-        Vector3 right = Vector3.Cross(_camera.LookAt, _camera.Up);
-        _camera.Position += moveSpeed * right;
-    }
-    
     // For easier access
-    private ScreenPlane Screen => _camera.ScreenPlane;
+    private ScreenPlane Screen => Camera.ScreenPlane;
 
     public void Render()
     {
@@ -63,7 +42,7 @@ public class RayTracer
                 var screenPosition = Screen.TopLeft + widthScale * Screen.TopLR + heightScale * Screen.TBLeft;
                 var direction = screenPosition;
                 direction.NormalizeFast();
-                var ray = new Ray(_camera.Position, direction);
+                var ray = new Ray(Camera.Position, direction);
 
                 var illumination = Trace(ray);
 
@@ -166,7 +145,7 @@ public class RayTracer
         Display.Clear(0);
 
         // Draw camera in green
-        var camera = DebugWorldToScreen(_camera.Position);
+        var camera = DebugWorldToScreen(Camera.Position);
         Display.Bar(camera.X - 1, camera.Y - 1, camera.X + 1, camera.Y + 1, 0x00_ff_00);
 
         // Light sources
@@ -178,7 +157,7 @@ public class RayTracer
 
         // Draw screen plane in white
         // Get mid point of top and bottom corners
-        var screen = _camera.ScreenPlane;
+        var screen = Camera.ScreenPlane;
         var leftVec = (screen.TopLeft + screen.BottomLeft) / 2;
         var rightVec = (screen.TopRight + screen.BottomRight) / 2;
         var left = DebugWorldToScreen(leftVec);
@@ -200,7 +179,7 @@ public class RayTracer
             // Primary rays
             var ratioAlongScreen = i / 10.0f;
             var posAlongScreen = leftVec + ratioAlongScreen * (rightVec - leftVec);
-            var ray = new Ray(_camera.Position, posAlongScreen.Normalized());
+            var ray = new Ray(Camera.Position, posAlongScreen.Normalized());
             var intersection = Scene.ClosestIntersection(ray);
             var distance = intersection?.Distance ?? 100.0f;
             var intersectLocation = ray.Evaluate(distance);

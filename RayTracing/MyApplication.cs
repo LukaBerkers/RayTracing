@@ -1,6 +1,5 @@
 using OpenTK.Mathematics;
-using System;
-using System.Collections.Generic;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace RayTracing;
 
@@ -27,6 +26,8 @@ public class MyApplication
     }
 
     public Surface Screen => _rayTracer.Display;
+
+    private Camera Camera => _rayTracer.Camera;
 
     // initialize
     public void Init()
@@ -67,32 +68,41 @@ public class MyApplication
                 throw new ArgumentOutOfRangeException();
         }
     }
-    
-    // updates the camera placement depending on keyboard movement
-    public void Update(bool wPressed, bool aPressed, bool sPressed, bool dPressed)
+
+    // Updates the camera placement depending on keyboard movement
+    public void Update(KeyboardState kbState)
     {
         const float moveSpeed = 0.2f;
 
         // Move the camera forward and backward for keys 'w' and 's'
-        if (wPressed)
-        {
-            _rayTracer.MoveCameraForward(moveSpeed);
-        }
-        else if (sPressed)
-        {
-            _rayTracer.MoveCameraBackward(moveSpeed);
-        }
-        
-        // Move the camera left and right for keys 'a' and 'd'
-        
-        if (aPressed)
-        {
-            _rayTracer.RotateCameraLeft(moveSpeed);
-        }
-        else if (dPressed)
-        {
-            _rayTracer.RotateCameraRight(moveSpeed);
-        }
+        if (kbState[Keys.W])
+            MoveCameraForward(moveSpeed);
+        else if (kbState[Keys.S]) MoveCameraBackward(moveSpeed);
 
+        // Move the camera left and right for keys 'a' and 'd'
+        if (kbState[Keys.A])
+            MoveCameraLeft(moveSpeed);
+        else if (kbState[Keys.D]) MoveCameraRight(moveSpeed);
+    }
+
+    // Keyboard movement of camera
+    private void MoveCameraForward(float moveSpeed)
+    {
+        Camera.Position += moveSpeed * Camera.LookAt;
+    }
+
+    private void MoveCameraBackward(float moveSpeed)
+    {
+        Camera.Position -= moveSpeed * Camera.LookAt;
+    }
+
+    private void MoveCameraLeft(float moveSpeed)
+    {
+        Camera.Position -= moveSpeed * Camera.Right;
+    }
+
+    private void MoveCameraRight(float moveSpeed)
+    {
+        Camera.Position += moveSpeed * Camera.Right;
     }
 }

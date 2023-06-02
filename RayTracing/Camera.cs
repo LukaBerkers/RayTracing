@@ -5,7 +5,6 @@ namespace RayTracing;
 public class Camera
 {
     private Vector3 _lookAt;
-    private Vector3 _right;
     private Vector3 _up;
     public Vector3 Position;
     public ScreenPlane ScreenPlane;
@@ -16,8 +15,8 @@ public class Camera
         _lookAt = lookAt.Normalized();
         _up = up.Normalized();
         var midScreen = position + lookAt;
-        _right = Vector3.Cross(lookAt, up);
-        var scaledRight = aspectRatio * _right;
+        Right = Vector3.Cross(lookAt, up);
+        var scaledRight = aspectRatio * Right;
         ScreenPlane = new ScreenPlane
         {
             TopLeft = midScreen + up - scaledRight,
@@ -33,7 +32,7 @@ public class Camera
         set
         {
             _lookAt = value.Normalized();
-            _right = Vector3.Cross(value, Up);
+            Right = Vector3.Cross(value, Up);
         }
     }
 
@@ -43,9 +42,11 @@ public class Camera
         set
         {
             _up = value.Normalized();
-            _right = Vector3.Cross(_lookAt, value);
+            Right = Vector3.Cross(_lookAt, value);
         }
     }
+
+    public Vector3 Right { get; private set; }
 }
 
 public struct ScreenPlane

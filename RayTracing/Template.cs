@@ -183,12 +183,7 @@ public class OpenTKApp : GameWindow
         base.OnUpdateFrame(e);
         // called once per frame; app logic
         if (KeyboardState[Keys.Escape]) _terminated = true;
-        // if pressed, keyboard keys: w, a, s, d, passed as boolean to update() function
-        bool wPressed = KeyboardState[Keys.W];
-        bool aPressed = KeyboardState[Keys.A];
-        bool sPressed = KeyboardState[Keys.S];
-        bool dPressed = KeyboardState[Keys.D];
-        _app?.Update(wPressed, aPressed, sPressed, dPressed);
+        _app?.Update(KeyboardState);
     }
 
     protected override void OnRenderFrame(FrameEventArgs e)
