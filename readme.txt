@@ -17,35 +17,61 @@ and information that is needed to grade them, including detailed information on 
 ----------
 | Camera |
 ----------
+The Camera class fulfills the requirements for supporting arbitrary field of view, positions, and orientations.
+1. Arbitrary Field of View (FOV): The Camera class allows setting the field of view (FOV) through the RayTracer constructor, which takes an aspect ratio parameter (var aspectRatio = (float)display.Width / display.Height;). By providing the desired aspect ratio, we can control the width-to-height ratio of the camera's viewing plane. This indirectly affects the FOV, as a wider aspect ratio will result in a wider field of view, and a narrower aspect ratio will result in a narrower field of view. In the Camera class we clamp the FOV between 60 and 90 degrees, and to calculate the scalar by which we multiply the lookAt vector, we execute this mathematical operation: float scalar = 1 / (MathF.Tan(MathF.PI * clampedDegree / 180.0f / 2.0f)); effectively changing the FOV within the degree domain. 
+2. Arbitrary Positions and Orientations: The Camera class allows setting the camera's position and orientation through its constructor. The position parameter defines the camera's location in 3D space, while the lookAt and up parameters determine the camera's orientation and where it is pointing.
+    * Position: The position parameter allows specifying an arbitrary 3D position for the camera. This enables placing the camera at any desired location within the scene.
+    * LookAt: The lookAt parameter specifies the target or point in 3D space that the camera is aimed at. By providing an arbitrary lookAt vector, we can control the camera's orientation and define where it is directed.
+    * Up: The up parameter defines the camera's up direction, which is used to determine the camera's tilt and roll. By specifying an arbitrary up vector, we can control the camera's orientation and achieve different viewing angles.
+The Camera class also provides getter and setter properties for the lookAt and up vectors, allowing us to dynamically update the camera's orientation during runtime.
+In summary, the Camera class supports arbitrary field of view by allowing specification of the aspect ratio. It also supports arbitrary positions and orientations by accepting parameters for the camera's position, lookAt target, and up direction. This enables flexibility in placing and aiming the camera within the 3D scene.
+
+High-level code overview:
 The Camera class is defined in the source file "Camera.cs" which contains the code required for setting up and 
 manipulating a virtual camera for ray tracing purposes. The class has the Vector3 attributes "_lookAt", "_right", "_up",
 and "Position" along with a ScreenPlane struct. The Camera is instantiated within the RayTracer class, with the Camera 
 constructor taking in four parameters:
-1. The position of the camera in 3D space. In this case, it is Vector3.Zero, which represents the origin (0, 0, 0) in the world coordinate system.
-2. The direction the camera is looking at. In this case, it is -Vector3.UnitZ, which represents the negative z-axis direction. It means the camera is looking towards the negative z-axis direction.
-3. The up vector that determines the camera's orientation. In this case, it is Vector3.UnitY, which represents the positive y-axis direction. It means the camera's up direction is pointing towards the positive y-axis direction.
-4. The aspect ratio of the camera's view. It is used to calculate the width and height of the camera's screen plane. 
-The aspect ratio is the ratio of the width to the height of the display or viewport where the camera's view will be rendered.
-By default this aspect ratio is equal to 1. 
+1. The position of the camera in 3D space. By default, it is Vector3.Zero, which represents the origin (0, 0, 0) in the world coordinate system.
+2. The direction the camera is looking at. By default, it is -Vector3.UnitZ, which represents the negative z-axis direction. It means the camera is looking towards the negative z-axis direction.
+3. The up vector that determines the camera's orientation. By default, it is Vector3.UnitY, which represents the positive y-axis direction. It means the camera's up direction is pointing towards the positive y-axis direction.
+4. The aspect ratio of the camera's view. It is used to calculate the width and height of the camera's screen plane. The aspect ratio is the ratio of the width to the height of the display or viewport where the camera's view will be rendered. By default this aspect ratio is equal to 1. 
 
-The ScreenPlane struct represents the camera's screen plane in 3D space. It defines four corner points (TopLeft, TopRight, BottomLeft, BottomRight) that form a rectangle on the screen.
-To calculate the the corner of the screen plane, for example "TopLeft" corner we can take the cross product of the lookAt and up vectors, multiply it by the aspect ratio to get a scaled value, then add this value along with the position + lookAt + up to get the corner. Adequate adjustments are completed for the other corners. 
-The Camera class also calculates the screen plane based on the camera's position, look-at direction, up vector, and aspect ratio.
-The LookAt and Up methods have getters and setters that updated on changes such as keyboard movement which is described later on.
+The ScreenPlane struct represents the camera's screen plane in 3D space. It defines four corner points (TopLeft, TopRight, BottomLeft, BottomRight) that form a rectangle on the screen. To calculate the the corner of the screen plane, for example "TopLeft" corner we can take the cross product of the lookAt and up vectors, multiply it by the aspect ratio to get a scaled value, then add this value along with the position + lookAt + up to get the corner. Adequate adjustments are completed for the other corners. The Camera class also calculates the screen plane based on the camera's position, look-at direction, up vector, and aspect ratio. The LookAt and Up methods have getters and setters that updated on changes such as keyboard movement which is described later on.
 
--------------
+--------------
 | Primitives |
--------------
+--------------
 Primitives are defined as an abstract class with class attributes "Color" which is a RGB vector from 0 to 1 and 
 "Material" which is of type MaterialType which is an enum for Matte, Plastic, and Metal.
 
-There are three primitive types: Plane, Sphere and Triangle.
-
+Plane:
 The plane primitive has attributes "normal" which is assumed to be of unit length, "distance" which is the signed
 distance according to the direction of the "normal", and the class attributes of "color" and "material", with the 
 default material type being matte.
 
-The intersection for the plane is calculated... 
+The code defines a class called Plane that inherits from the Primitive class. This class represents a plane in 3D space.
+1. It has additional properties for Normal (representing the plane's normal vector) and Distance (representing the signed distance of the plane from the origin).
+2. It overrides the Intersect method to calculate the intersection between a given Ray and the plane.
+3. The intersection calculation (as derived from the mathematical equations discussed in lectures) involves dot product operations and other equations to determine the intersection point and whether the ray is parallel to the plane.
+
+Sphere:
+The code defines a class called Sphere that also inherits from the Primitive class. This class represents a sphere in 3D space.
+1. It has additional properties for Position (representing the center position of the sphere) and Radius (representing the sphere's radius).
+2. It has a constructor that initialises the Position, Radius, Color, and Material properties of the sphere (similar to the Plane primitive).
+3. It overrides the Intersect method to calculate the intersection between a given Ray and the sphere.
+4. The intersection calculation involves quadratic formula computations and dot product operations to determine the intersection points and surface normal of the sphere.
+
+These classes provide the necessary functionality to perform intersection tests between rays and the primitives planes and spheres, allowing for accurate rendering of the scene and interaction with light sources and materials.
+
+---------
+| Scene |
+---------
+This Scene class provides a way to organise and manage the objects in the scene, allowing for flexible scene definition by adding and removing light sources and primitives as needed. 
+It provides a convenient method to find the closest intersection between a ray and the scene's primitives, which is crucial for ray tracing calculations.
+To do so the class has two public properties: LightSources and Primitives which hold instances of the Light and Primitive objects, respectively.
+The ClosestIntersection method takes a Ray as input and returns the closest intersection between the ray and any primitive in the scene. 
+It iterates over each primitive in the Primitives list and calls the Intersect method of each primitive to check for intersections with the ray. 
+It keeps track of the closest intersection found so far by comparing the distances of the intersections. The method returns the closest intersection found or null if no intersection occurs.
 
 ----------
 | Lights |
@@ -55,7 +81,7 @@ The Light class provides a constructor that takes the location and intensity of 
 The Location field represents the position of the light source in 3D space. It is a Vector3 that specifies the coordinates of the light source.
 The Intensity field represents the intensity of the light source, specifying its color and brightness. It is also a Vector3 that defines the RGB components of the light source.
 Lights are instantiated in the MyApplication class, where "an arbitrary number of point lights" can be added by including their location and intensity in a list. 
-Take for example: var lights = new List<Light> { new((3, 4, 0), (100, 24, 24)), new((-1, 5, -1), (24, 8, 8)) };
+Take for example: var lights = new List<Light> { new((3, 4, 0), (100, 24, 24)), new((-1, 5, -1), (24, 8, 8)) }; which after execution contains two light objects, each representing a light source with a specific position and intensity. These light sources can be used in the rendering or illumination calculations within the ray-tracing application.
 
 -------------
 | Materials | !#$#@$#@%$#@%$#%#$%@!!@#$!@#$!@#$!@$@#$%#@$!@$@$@#!$@!$@!$@!$!@$@!#$@#!$!@#$@#$!@#
