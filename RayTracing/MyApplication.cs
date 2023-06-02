@@ -34,7 +34,7 @@ public class MyApplication
 
         var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall, diagonalWall };
 
-        _rayTracer = new RayTracer(screen, lights, shapes);
+        _rayTracer = new RayTracer(screen, lights, shapes, 90.0f);
     }
 
     public Surface Screen => _rayTracer.Display;
