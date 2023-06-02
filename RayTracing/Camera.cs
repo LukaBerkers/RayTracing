@@ -16,8 +16,8 @@ public class Camera
         _lookAt = lookAt.Normalized();
         _up = up.Normalized();
 
-        // Clamp the fov value to be within the range [60, 90] degrees
-        var degrees = MathHelper.Clamp(fov, 60.0f, 90.0f);
+        // Clamp the fov value to be within the range [60, 120] degrees
+        var degrees = MathHelper.Clamp(fov, 60.0f, 120.0f);
         // Transitioning the degrees to a scalar
         var screenDistance = 1 / float.Tan(MathHelper.DegreesToRadians(degrees) / 2.0f);
 
