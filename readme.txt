@@ -84,10 +84,10 @@ Lights are instantiated in the MyApplication class, where "an arbitrary number o
 Take for example: var lights = new List<Light> { new((3, 4, 0), (100, 24, 24)), new((-1, 5, -1), (24, 8, 8)) }; which after execution contains two light objects, each representing a light source with a specific position and intensity. These light sources can be used in the rendering or illumination calculations within the ray-tracing application.
 
 -------------
-| Materials | !#$#@$#@%$#@%$#%#$%@!!@#$!@#$!@#$!@$@#$%#@$!@$@$@#!$@!$@!$@!$!@$@!#$@#!$!@#$@#$!@#
+| Materials |
 -------------
-
-
+To support the Phong shading model, each primitive (planes and spheres) in the Primitive class can be assigned a material type, such as Matte, Plastic, or Metal, which are defined as enum values in the code.
+The material type can be used to determine the shading calculations for each intersection point, considering factors like diffuse reflection, specular reflection, and ambient light.
 
 -----------------------
 | Demonstration Scene |
@@ -154,8 +154,6 @@ In summary, the DebugDrawCircle method provides a convenient way to visualize ci
 =====================================
 ||| Bonus Assignments Implemented |||
 =====================================
--
-
 
 ===============================
 ||| External Materials Used |||
