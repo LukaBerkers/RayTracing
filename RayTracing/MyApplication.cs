@@ -12,14 +12,27 @@ public class MyApplication
         // Just one light, I don't care about its properties for now
         var lights = new List<Light> { new((3, 4, 0), (8, 24, 24)), new((-1, 5, -1), (24, 8, 8)) };
 
-        var plane = new Plane(Vector3.UnitY, -1.0f, (0.5f, 0.125f, 0.5f));
-        // var mirrorWall = new Plane((1.0f, 0.0f, 1.0f), -10.0f, Vector3.Zero, Primitive.MaterialType.Mirror);
+        Vector3 TileTexture(Vector2 uv)
+        {
+            // var c = (int)uv.X + (int)uv.Y & 1;
+            var c = ((int)MathHelper.Floor(uv.X) + (int)MathHelper.Floor(uv.Y)) & 1;
+            return new Vector3(c);
+        }
+
+        var plane = new Plane(Vector3.UnitY, -1.0f, (0.5f, 0.125f, 0.5f), Primitive.MaterialType.Matte, TileTexture);
+        var diagonalWall = new Plane
+        (
+            new Vector3(1.0f, 0.0f, 1.0f).Normalized(),
+            -10.0f, Vector3.Zero,
+            Primitive.MaterialType.Plastic,
+            TileTexture
+        );
         Vector3 copperColor = (13.0f / 18.0f, 9.0f / 20.0f, 0.2f);
         var copperBall = new Sphere((-2, 0, -4), 1, copperColor, Primitive.MaterialType.Metal);
         var greenSphere = new Sphere((2, 1, -6), 4, (0, 0.5f, 0), Primitive.MaterialType.Plastic);
         var mirrorBall = new Sphere((-2, 2, -6), 2, Vector3.One, Primitive.MaterialType.Mirror);
 
-        var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall };
+        var shapes = new List<Primitive> { plane, copperBall, greenSphere, mirrorBall, diagonalWall };
 
         _rayTracer = new RayTracer(screen, lights, shapes);
     }
