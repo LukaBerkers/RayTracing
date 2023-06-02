@@ -72,7 +72,8 @@ public class MyApplication
     // Updates the camera placement depending on keyboard movement
     public void Update(KeyboardState kbState)
     {
-        const float moveSpeed = 0.2f;
+        const float moveSpeed = 0.125f;
+        const float rotationSpeed = 0.125f;
 
         // Move the camera forward and backward for keys 'w' and 's'
         if (kbState[Keys.W])
@@ -81,8 +82,8 @@ public class MyApplication
 
         // Move the camera left and right for keys 'a' and 'd'
         if (kbState[Keys.A])
-            MoveCameraLeft(moveSpeed);
-        else if (kbState[Keys.D]) MoveCameraRight(moveSpeed);
+            RotateCamera(-rotationSpeed);
+        else if (kbState[Keys.D]) RotateCamera(rotationSpeed);
     }
 
     // Keyboard movement of camera
@@ -96,13 +97,9 @@ public class MyApplication
         Camera.Position -= moveSpeed * Camera.LookAt;
     }
 
-    private void MoveCameraLeft(float moveSpeed)
+    private void RotateCamera(float angle)
     {
-        Camera.Position -= moveSpeed * Camera.Right;
-    }
-
-    private void MoveCameraRight(float moveSpeed)
-    {
-        Camera.Position += moveSpeed * Camera.Right;
+        var rotation = Matrix3.CreateFromAxisAngle(Camera.Up, angle);
+        Camera.LookAt = rotation * Camera.LookAt;
     }
 }

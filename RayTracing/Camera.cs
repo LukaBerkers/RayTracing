@@ -5,25 +5,21 @@ namespace RayTracing;
 public class Camera
 {
     private Vector3 _lookAt;
-    private Vector3 _up;
-    public Vector3 Position;
-    public ScreenPlane ScreenPlane;
+    private Vector3 _position;
+    private float _aspectRatio;
+    public ScreenPlane ScreenPlane { get; private set; }
 
     public Camera(Vector3 position, Vector3 lookAt, Vector3 up, float aspectRatio = 1.0f)
     {
-        Position = position;
+        _position = position;
         _lookAt = lookAt.Normalized();
-        _up = up.Normalized();
+        _aspectRatio = aspectRatio;
+        Up = up.Normalized();
+        Right = Vector3.Cross(_lookAt, Up);
+        
         var midScreen = position + lookAt;
-        Right = Vector3.Cross(lookAt, up);
         var scaledRight = aspectRatio * Right;
-        ScreenPlane = new ScreenPlane
-        {
-            TopLeft = midScreen + up - scaledRight,
-            TopRight = midScreen + up + scaledRight,
-            BottomLeft = midScreen - up - scaledRight,
-            BottomRight = midScreen - up + scaledRight
-        };
+        ScreenPlane = new ScreenPlane(midScreen, up, scaledRight);
     }
 
     public Vector3 LookAt
@@ -32,21 +28,28 @@ public class Camera
         set
         {
             _lookAt = value.Normalized();
-            Right = Vector3.Cross(value, Up);
+            Right = Vector3.Cross(_lookAt, Up);
+            var midScreen = _position + _lookAt;
+            var scaledRight = _aspectRatio * Right;
+            ScreenPlane = new ScreenPlane(midScreen, Up, scaledRight);
         }
     }
 
-    public Vector3 Up
-    {
-        get => _up;
-        set
-        {
-            _up = value.Normalized();
-            Right = Vector3.Cross(_lookAt, value);
-        }
-    }
+    public Vector3 Up { get; }
 
     public Vector3 Right { get; private set; }
+
+    public Vector3 Position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            var midScreen = _position + _lookAt;
+            var scaledRight = _aspectRatio * Right;
+            ScreenPlane = new ScreenPlane(midScreen, Up, scaledRight);
+        }
+    }
 }
 
 public struct ScreenPlane
@@ -59,4 +62,12 @@ public struct ScreenPlane
 
     public Vector3 TopLR => TopRight - TopLeft;
     public Vector3 TBLeft => BottomLeft - TopLeft;
+
+    public ScreenPlane(Vector3 midScreen, Vector3 up, Vector3 scaledRight)
+    {
+        TopLeft = midScreen + up - scaledRight;
+        TopRight = midScreen + up + scaledRight;
+        BottomLeft = midScreen - up - scaledRight;
+        BottomRight = midScreen - up + scaledRight;
+    }
 }
